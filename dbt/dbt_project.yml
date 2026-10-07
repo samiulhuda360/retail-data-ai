@@ -1,0 +1,46 @@
+name: acme_retail
+version: "1.0.0"
+config-version: 2
+profile: acme_retail
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages", "logs"]
+
+vars:
+  # The landing zone is replayed as if read at this moment (UTC), so freshness and lag checks are reproducible.
+  as_of: "2026-04-01 06:00:00"
+  # The 3PL closes a week 9 days after it ends; orders older than this many days must have a shipment.
+  shipment_lag_days: 12
+  # Largest difference (NZD) allowed between POS takings and the finance ledger for one store-day.
+  recon_tolerance_nzd: 0.05
+
+models:
+  acme_retail:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      core:
+        +schema: marts
+      reporting:
+        +schema: reporting
+      semantic:
+        +schema: marts
+
+seeds:
+  acme_retail:
+    +schema: reference
+
+data_tests:
+  acme_retail:
+    +store_failures: true
+    +schema: dq_audit

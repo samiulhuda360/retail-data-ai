@@ -1,0 +1,4 @@
+sales_channel,channel_name,description
+store,store,Sales at the seven Acme Kitchen stores (POS)
+online,online,Orders placed on the NZ and AU web shops
+wholesale,wholesale,Orders from independent homeware retailers (ERP sales orders)

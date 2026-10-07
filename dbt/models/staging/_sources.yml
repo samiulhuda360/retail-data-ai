@@ -1,0 +1,192 @@
+version: 2
+
+# The landing zone, loaded as text by `retail ingest` (one table per feed, files combined by column name).
+# Tests here run on the data exactly as delivered. They are tagged `dq_detect` and set to warn: they exist to
+# catch bad deliveries, which staging then repairs or quarantines, so a bad file does not stop the build.
+
+sources:
+  - name: raw
+    schema: raw
+    description: Source feeds from the ERP, the store tills (POS), the web shop, the 3PL and three ad platforms.
+    # `_extracted_at` is replayed against the as-of time (var `as_of`) so freshness is reproducible on any day.
+    config:
+      loaded_at_field: >-
+        cast(_extracted_at as timestamp)
+        + ((current_timestamp at time zone 'UTC') - cast('{{ var("as_of") }}' as timestamp))
+      freshness:
+        warn_after: {count: 33, period: day}
+        error_after: {count: 35, period: day}
+    tables:
+      - name: erp_materials
+        description: ERP material master export (one row per material). Refreshed daily.
+        config:
+          freshness:
+            warn_after: {count: 1, period: day}
+            error_after: {count: 2, period: day}
+        columns:
+          - name: MATERIAL
+            description: ERP material number, e.g. MAT-1001.
+            data_tests: [unique, not_null]
+          - name: SKU
+            description: Stock-keeping unit used by the tills and the web shop.
+            data_tests: [unique, not_null]
+          - name: MATL_GROUP
+            description: Material group code.
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["CW", "BW", "KT", "TW", "FS"]
+
+      - name: erp_customers
+        description: Wholesale customers (independent homeware retailers).
+        config:
+          freshness:
+            warn_after: {count: 1, period: day}
+            error_after: {count: 2, period: day}
+        columns:
+          - name: CUSTOMER
+            data_tests: [unique, not_null]
+
+      - name: erp_stores
+        description: Store master with each store's region, country and trading currency.
+        config:
+          freshness:
+            warn_after: {count: 1, period: day}
+            error_after: {count: 2, period: day}
+        columns:
+          - name: STORE_ID
+            data_tests: [unique, not_null]
+          - name: CURRENCY
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["NZD", "AUD"]
+
+      - name: erp_fx_rates
+        description: Daily AUD to NZD rates published by finance.
+        config:
+          freshness:
+            warn_after: {count: 1, period: day}
+            error_after: {count: 2, period: day}
+        columns:
+          - name: RATE_DATE
+            data_tests: [unique, not_null]
+
+      - name: erp_gl_store_takings
+        description: Finance ledger postings of each store's daily takings, in local currency and NZD. Monthly files.
+
+      - name: erp_sales_orders
+        description: Wholesale sales order lines exported monthly from the ERP.
+        columns:
+          - name: MATERIAL
+            description: Material ordered. Must exist in the material master.
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('raw', 'erp_materials')
+                    field: MATERIAL
+                  config:
+                    severity: warn
+                    tags: ["dq_detect"]
+          - name: CURRENCY
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["NZD", "AUD"]
+
+      - name: pos_transactions
+        description: Till lines from the seven stores, one file per store per month.
+        data_tests:
+          - unique:
+              name: pos_transaction_line_is_unique
+              arguments:
+                column_name: "transaction_id || '-' || line_no"
+              config:
+                severity: warn
+                tags: ["dq_detect"]
+          - expression_is_true:
+              name: pos_sale_quantity_is_positive
+              arguments:
+                expression: "cast(quantity as integer) > 0"
+              config:
+                where: "txn_type = 'SALE'"
+                severity: warn
+                tags: ["dq_detect"]
+        columns:
+          - name: txn_type
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["SALE", "RETURN"]
+          - name: currency
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["NZD", "AUD"]
+          - name: store_id
+            data_tests:
+              - relationships:
+                  arguments:
+                    to: source('raw', 'erp_stores')
+                    field: STORE_ID
+
+      - name: ecom_orders
+        description: Web shop order headers, one file per month.
+        data_tests:
+          - columns_match_contract:
+              name: ecom_orders_columns_match_contract
+              arguments:
+                expected_columns: [order_id, order_ts, customer_id, site, ship_region, marketing_channel, currency,
+                                   order_status, items_subtotal, discount_total, shipping_fee, order_total,
+                                   _extracted_at, _source_file]
+              config:
+                severity: warn
+                tags: ["dq_detect"]
+        columns:
+          - name: order_id
+            data_tests: [unique, not_null]
+          - name: order_status
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["completed", "cancelled"]
+          - name: marketing_channel
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["paid_search", "paid_social", "display", "email", "affiliate", "organic"]
+
+      - name: ecom_order_lines
+        description: Web shop order lines, one file per month.
+        columns:
+          - name: order_id
+            data_tests:
+              - relationships:
+                  arguments:
+                    to: source('raw', 'ecom_orders')
+                    field: order_id
+
+      - name: logistics_shipments
+        description: >-
+          Shipments from the third-party logistics provider (3PL), one file per ISO week of dispatch. The 3PL closes
+          a week 9 days after it ends, so at most about 8 days pass between files.
+        config:
+          freshness:
+            warn_after: {count: 7, period: day}
+            error_after: {count: 8, period: day}
+        columns:
+          - name: shipment_id
+            data_tests: [unique, not_null]
+          - name: channel
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["online", "wholesale"]
+
+      - name: mkt_search_ads
+        description: Search ads daily cost by campaign and geo target, cost in micros of the account currency.
+      - name: mkt_social_ads
+        description: Social ads daily spend by campaign and region, dates as dd/mm/yyyy.
+      - name: mkt_other_channels
+        description: Daily cost of display, email and affiliate marketing by region.

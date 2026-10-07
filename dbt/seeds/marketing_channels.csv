@@ -1,0 +1,7 @@
+marketing_channel,channel_name,is_paid,platform
+paid_search,paid_search,true,search ads platform
+paid_social,paid_social,true,social ads platform
+display,display,true,display network
+email,email,true,email service and agency fees
+affiliate,affiliate,true,affiliate commissions
+organic,organic,false,unpaid (direct and organic search)

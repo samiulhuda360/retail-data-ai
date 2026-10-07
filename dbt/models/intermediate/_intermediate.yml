@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: int_sales__lines
+    description: >-
+      Store, online and wholesale sales lines in one shape, converted to NZD at the day's rate, with standard cost.
+      Quarantined till lines and cancelled web orders are excluded.
+    columns:
+      - name: sales_line_id
+        data_tests: [unique, not_null]
+  - name: int_sales__orders
+    description: One row per order (till transaction, web order or wholesale sales order), built from its lines.
+  - name: int_dq__quarantined_pos_lines
+    description: Till lines held back from the marts because they break a business rule, with the reason.
+  - name: int_marketing__spend_nzd
+    description: Ad spend converted to NZD at the day's rate.

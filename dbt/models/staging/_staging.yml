@@ -1,0 +1,72 @@
+version: 2
+
+models:
+  - name: stg_erp__materials
+    description: Material master, typed, with the product category name from the material_groups seed.
+    columns:
+      - name: material_id
+        data_tests: [unique, not_null]
+  - name: stg_erp__customers
+    description: Wholesale customers with their region.
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+  - name: stg_erp__stores
+    description: Store master; its currency is the trading currency for all of a store's till lines.
+    columns:
+      - name: store_id
+        data_tests: [unique, not_null]
+  - name: stg_erp__fx_rates
+    description: Daily AUD to NZD rates.
+    columns:
+      - name: rate_date
+        data_tests: [unique, not_null]
+  - name: stg_erp__gl_store_takings
+    description: Finance ledger postings of store takings per day (the reconciliation reference).
+  - name: stg_erp__sales_order_lines
+    description: Wholesale sales order lines from the ERP, renamed from SAP-style fields and typed.
+    columns:
+      - name: sales_order_line_id
+        data_tests: [unique, not_null]
+  - name: stg_pos__transaction_lines
+    description: >-
+      Till lines with duplicate deliveries removed (first copy of each transaction line kept, via row_number),
+      the currency taken from the store master, and an is_valid flag for SALE lines with a non-positive quantity.
+    columns:
+      - name: pos_line_id
+        data_tests: [unique, not_null]
+      - name: currency
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["NZD", "AUD"]
+  - name: stg_ecom__orders
+    description: Web shop order headers, columns selected by name so schema drift cannot shift values.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+  - name: stg_ecom__order_lines
+    description: Web shop order lines.
+    columns:
+      - name: order_line_id
+        data_tests: [unique, not_null]
+  - name: stg_logistics__shipments
+    description: 3PL shipments with an on-time flag (delivered on or before the promised date) and days late.
+    columns:
+      - name: shipment_id
+        data_tests: [unique, not_null]
+  - name: stg_marketing__ad_spend
+    description: Paid media cost from the search, social and other-channel exports, unioned into one shape.
+    columns:
+      - name: marketing_channel
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["paid_search", "paid_social", "display", "email", "affiliate"]
+      - name: region_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('regions')
+                field: region_code

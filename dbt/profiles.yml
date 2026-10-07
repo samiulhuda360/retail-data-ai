@@ -1,0 +1,21 @@
+# Connection profiles. Every value comes from an environment variable or a safe default; no secrets live here.
+acme_retail:
+  target: "{{ env_var('DBT_TARGET', 'duckdb') }}"
+  outputs:
+    # Local warehouse: a single DuckDB file built from the landing zone (the default, used by CI).
+    duckdb:
+      type: duckdb
+      path: "{{ env_var('RETAIL_WAREHOUSE', '../data/warehouse.duckdb') }}"
+      schema: main
+      threads: 4
+
+    # The same project on Databricks through dbt-databricks (pip install dbt-databricks).
+    # The raw feeds would be landed as Delta tables in <catalog>.raw by the platform's own ingestion.
+    databricks:
+      type: databricks
+      host: "{{ env_var('DATABRICKS_HOST', 'not-set.cloud.databricks.com') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH', '/sql/1.0/warehouses/not-set') }}"
+      token: "{{ env_var('DATABRICKS_TOKEN', '') }}"
+      catalog: "{{ env_var('DATABRICKS_CATALOG', 'acme_retail') }}"
+      schema: main
+      threads: 8

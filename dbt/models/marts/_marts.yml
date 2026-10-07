@@ -1,0 +1,123 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: Calendar for FY2026 (April 2025 to March 2026) with week, month, quarter and fiscal year.
+    columns:
+      - name: date_day
+        data_tests: [unique, not_null]
+  - name: dim_regions
+    description: The five sales regions (Auckland, Wellington, Christchurch, Sydney, Melbourne) and their country.
+    columns:
+      - name: region_code
+        data_tests: [unique, not_null]
+  - name: dim_sales_channels
+    description: Where a sale happened.
+    columns:
+      - name: sales_channel
+        data_tests: [unique, not_null]
+  - name: dim_marketing_channels
+    description: Attribution channels for online orders and whether each is paid media.
+    columns:
+      - name: marketing_channel
+        data_tests: [unique, not_null]
+  - name: dim_stores
+    description: The seven stores.
+    columns:
+      - name: store_id
+        data_tests: [unique, not_null]
+  - name: dim_products
+    description: Products from the material master plus inferred members (category Unknown) for sold materials missing from it.
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+      - name: product_category
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Cookware", "Bakeware", "Kitchen Tools", "Tableware", "Food Storage", "Unknown"]
+
+  - name: fct_sales_lines
+    description: One row per sales line across store, online and wholesale. Revenue, cost and gross profit in NZD.
+    data_tests:
+      - expression_is_true:
+          name: fct_sales_lines_sale_quantity_is_positive
+          arguments:
+            expression: "quantity > 0"
+          config:
+            where: "order_type = 'sale'"
+    columns:
+      - name: sales_line_id
+        data_tests: [unique, not_null]
+      - name: revenue_nzd
+        data_tests: [not_null]
+      - name: sales_channel
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_sales_channels')
+                field: sales_channel
+      - name: region_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_regions')
+                field: region_code
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+      - name: order_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["sale", "return"]
+
+  - name: fct_orders
+    description: One row per order with its attributed marketing channel (online only) and NZD revenue.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: marketing_channel
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_marketing_channels')
+                field: marketing_channel
+
+  - name: fct_ad_spend
+    description: One row per day, marketing channel, region and campaign; spend in NZD.
+    columns:
+      - name: spend_id
+        data_tests: [unique, not_null]
+      - name: spend_nzd
+        data_tests: [not_null]
+
+  - name: fct_shipments
+    description: One row per 3PL shipment with the on-time flag.
+    columns:
+      - name: shipment_id
+        data_tests: [unique, not_null]
+      - name: region_code
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_regions')
+                field: region_code
+
+  - name: rpt_monthly_sales
+    description: Monthly orders, units, revenue, cost and gross profit by channel and region, with month-on-month change (lag) and a running total.
+  - name: rpt_monthly_category_margin
+    description: Monthly revenue, gross profit and gross margin by category, ranked by gross profit within the month.
+  - name: rpt_monthly_marketing
+    description: Monthly ad spend, attributed online revenue and return on ad spend by paid channel.
+  - name: rpt_monthly_delivery
+    description: Monthly shipments and on-time delivery rate by channel (by promised month).
+  - name: rpt_top_products_monthly
+    description: Ten best-selling products per month by revenue (dense_rank), with share of the month.
+  - name: rpt_pos_finance_reconciliation
+    description: Cleaned store revenue against the finance ledger per store-day, with quarantined line counts.
