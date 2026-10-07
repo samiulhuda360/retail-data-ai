@@ -1,0 +1,198 @@
+version: 2
+
+# The semantic layer, in dbt's MetricFlow format. Facts carry measures and foreign entities; shared
+# dimensions (region, product, channels) live on small dimension models joined through those entities, so a
+# metric built from two facts (return on ad spend: orders and ad spend) can be grouped by the same region or
+# channel on both sides.
+
+models:
+  - name: metricflow_time_spine
+    description: One row per day from 2024 to 2027, used by MetricFlow for metric_time.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+
+semantic_models:
+  - name: sales_lines
+    description: Sales lines across store, online and wholesale. Revenue is net of returns, in NZD.
+    model: ref('fct_sales_lines')
+    defaults:
+      agg_time_dimension: order_date
+    entities:
+      - name: sales_line
+        type: primary
+        expr: sales_line_id
+      - name: product
+        type: foreign
+        expr: product_id
+      - name: region
+        type: foreign
+        expr: region_code
+      - name: sales_channel
+        type: foreign
+        expr: sales_channel
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: revenue
+        description: Net revenue in NZD (sales minus refunds; excludes shipping fees and cancelled orders).
+        agg: sum
+        expr: revenue_nzd
+      - name: gross_profit
+        description: Revenue minus standard cost, for lines with a known standard cost.
+        agg: sum
+        expr: gross_profit_nzd
+      - name: costed_revenue
+        description: Revenue of lines with a known standard cost (the base for gross margin).
+        agg: sum
+        expr: "case when has_cost then revenue_nzd else 0 end"
+      - name: units
+        description: Units sold, net of units refunded.
+        agg: sum
+        expr: quantity
+
+  - name: orders
+    description: One row per order. Online orders carry their attributed marketing channel.
+    model: ref('fct_orders')
+    defaults:
+      agg_time_dimension: order_date
+    entities:
+      - name: order
+        type: primary
+        expr: order_id
+      - name: region
+        type: foreign
+        expr: region_code
+      - name: sales_channel
+        type: foreign
+        expr: sales_channel
+      - name: marketing_channel
+        type: foreign
+        expr: marketing_channel
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: sale_orders
+        description: Number of sale orders (refund transactions are not orders).
+        agg: sum
+        expr: "case when order_type = 'sale' then 1 else 0 end"
+      - name: sale_order_revenue
+        description: Revenue of sale orders in NZD.
+        agg: sum
+        expr: "case when order_type = 'sale' then revenue_nzd else 0 end"
+      - name: attributed_revenue
+        description: Revenue of online sale orders attributed to a paid marketing channel.
+        agg: sum
+        expr: "case when is_paid_attribution and order_type = 'sale' then revenue_nzd else 0 end"
+
+  - name: ad_spend
+    description: Daily paid media cost per channel, region and campaign, in NZD.
+    model: ref('fct_ad_spend')
+    defaults:
+      agg_time_dimension: spend_date
+    entities:
+      - name: spend_line
+        type: primary
+        expr: spend_id
+      - name: region
+        type: foreign
+        expr: region_code
+      - name: marketing_channel
+        type: foreign
+        expr: marketing_channel
+    dimensions:
+      - name: spend_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: ad_spend
+        description: Paid media cost in NZD.
+        agg: sum
+        expr: spend_nzd
+
+  - name: shipments
+    description: 3PL shipments for online and wholesale orders.
+    model: ref('fct_shipments')
+    defaults:
+      agg_time_dimension: promised_date
+    entities:
+      - name: shipment
+        type: primary
+        expr: shipment_id
+      - name: region
+        type: foreign
+        expr: region_code
+      - name: sales_channel
+        type: foreign
+        expr: sales_channel
+    dimensions:
+      - name: promised_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: carrier
+        type: categorical
+    measures:
+      - name: shipments_due
+        description: Shipments whose promised delivery date falls in the period.
+        agg: sum
+        expr: "1"
+      - name: on_time_shipments
+        description: Shipments delivered on or before the promised date.
+        agg: sum
+        expr: "case when is_on_time then 1 else 0 end"
+
+  - name: regions
+    description: Sales regions.
+    model: ref('dim_regions')
+    entities:
+      - name: region
+        type: primary
+        expr: region_code
+    dimensions:
+      - name: region_name
+        type: categorical
+      - name: country
+        type: categorical
+
+  - name: products
+    description: Products and their category.
+    model: ref('dim_products')
+    entities:
+      - name: product
+        type: primary
+        expr: product_id
+    dimensions:
+      - name: product_category
+        type: categorical
+
+  - name: sales_channels
+    description: Store, online or wholesale.
+    model: ref('dim_sales_channels')
+    entities:
+      - name: sales_channel
+        type: primary
+        expr: sales_channel
+    dimensions:
+      - name: channel_name
+        type: categorical
+
+  - name: marketing_channels
+    description: Attribution channel of an online order.
+    model: ref('dim_marketing_channels')
+    entities:
+      - name: marketing_channel
+        type: primary
+        expr: marketing_channel
+    dimensions:
+      - name: channel_name
+        type: categorical

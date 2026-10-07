@@ -1,0 +1,107 @@
+version: 2
+
+# Business metrics. The five headline metrics are revenue, gross_margin, average_order_value, roas and
+# on_time_delivery_rate; the others are their building blocks and are queryable too.
+
+metrics:
+  - name: revenue
+    label: Revenue (NZD)
+    description: Net revenue in NZD across store, online and wholesale, net of refunds. Excludes shipping fees and cancelled web orders.
+    type: simple
+    type_params:
+      measure: revenue
+
+  - name: gross_profit
+    label: Gross profit (NZD)
+    description: Revenue minus standard cost of goods, for lines with a known standard cost.
+    type: simple
+    type_params:
+      measure: gross_profit
+
+  - name: costed_revenue
+    label: Costed revenue (NZD)
+    description: Revenue of lines with a known standard cost; the denominator of gross margin.
+    type: simple
+    type_params:
+      measure: costed_revenue
+
+  - name: gross_margin
+    label: Gross margin
+    description: Gross profit as a share of costed revenue (0.58 means 58%).
+    type: ratio
+    type_params:
+      numerator: gross_profit
+      denominator: costed_revenue
+
+  - name: units_sold
+    label: Units sold
+    description: Units sold net of refunded units.
+    type: simple
+    type_params:
+      measure: units
+
+  - name: orders
+    label: Orders
+    description: Number of sale orders (till sales, completed web orders, wholesale sales orders).
+    type: simple
+    type_params:
+      measure: sale_orders
+
+  - name: order_revenue
+    label: Order revenue (NZD)
+    description: Revenue of sale orders in NZD (before refunds); the numerator of average order value.
+    type: simple
+    type_params:
+      measure: sale_order_revenue
+
+  - name: average_order_value
+    label: Average order value (NZD)
+    description: Order revenue divided by the number of sale orders.
+    type: ratio
+    type_params:
+      numerator: order_revenue
+      denominator: orders
+
+  - name: ad_spend
+    label: Ad spend (NZD)
+    description: Paid media cost in NZD (search, social, display, email, affiliate).
+    type: simple
+    type_params:
+      measure: ad_spend
+
+  - name: attributed_revenue
+    label: Attributed revenue (NZD)
+    description: Revenue of online orders attributed (last touch) to a paid marketing channel.
+    type: simple
+    type_params:
+      measure: attributed_revenue
+
+  - name: roas
+    label: Return on ad spend
+    description: Attributed revenue divided by ad spend (4.2 means NZD 4.20 of revenue per NZD 1 spent).
+    type: ratio
+    type_params:
+      numerator: attributed_revenue
+      denominator: ad_spend
+
+  - name: shipments_due
+    label: Shipments due
+    description: Shipments whose promised delivery date falls in the period.
+    type: simple
+    type_params:
+      measure: shipments_due
+
+  - name: on_time_shipments
+    label: On-time shipments
+    description: Shipments delivered on or before the promised date.
+    type: simple
+    type_params:
+      measure: on_time_shipments
+
+  - name: on_time_delivery_rate
+    label: On-time delivery rate
+    description: On-time shipments divided by shipments due, by promised date.
+    type: ratio
+    type_params:
+      numerator: on_time_shipments
+      denominator: shipments_due
