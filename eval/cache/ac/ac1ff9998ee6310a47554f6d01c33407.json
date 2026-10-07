@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 10284713.745461, \"explanation\": \"Total revenue across all channels for FY2026 was 10,284,713.75 NZD.\"}"
+ },
+ "prompt_tokens": 1594,
+ "completion_tokens": 54,
+ "latency_s": 1.59
+}

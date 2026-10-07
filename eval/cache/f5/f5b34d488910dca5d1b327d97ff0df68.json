@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 110.9315282392465, \"explanation\": \"The average order value across all channels in December 2025 was 110.9315282392465.\"}"
+ },
+ "prompt_tokens": 1602,
+ "completion_tokens": 61,
+ "latency_s": 1.481
+}

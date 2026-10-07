@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 3157.718232644898, \"explanation\": \"The average wholesale order value over the financial year FY2026 is 3157.72 NZD.\"}\n```"
+ },
+ "prompt_tokens": 1627,
+ "completion_tokens": 58,
+ "latency_s": 1.34
+}

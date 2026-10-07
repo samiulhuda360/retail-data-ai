@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nWITH fy_dates AS (\n    SELECT \n        DATE '2025-04-01' AS start_date,\n        DATE '2026-03-31' AS end_date\n),\npaid_social_spend AS (\n    SELECT \n        COALESCE(SUM(s.spend_local), 0) AS total_ad_spend\n    FROM staging.stg_marketing__ad_spend s\n    CROSS JOIN fy_dates d\n    WHERE s.spend_date BETWEEN d.start_date AND d.end_date\n      AND s.region_code = 'AU'\n      AND LOWER(s.marketing_channel) = 'paid social'\n),\nattributed_social_revenue AS (\n    SELECT \n        COALESCE(SUM(o.items_subtotal - o.discount_total), 0) AS total_attributed_revenue\n    FROM staging.stg_ecom__orders o\n    CROSS JOIN fy_dates d\n    WHERE o.order_date BETWEEN d.start_date AND d.end_date\n      AND o.region_code = 'AU'\n      AND o.order_status <> 'cancelled'\n      AND LOWER(o.marketing_channel) = 'paid social'\n)\nSELECT \n    CASE \n        WHEN s.total_ad_spend = 0 THEN 0.0\n        ELSE r.total_attributed_revenue / s.total_ad_spend\n    END AS answer\nFROM paid_social_spend s\nCROSS JOIN attributed_social_revenue r\n```"
+ },
+ "prompt_tokens": 1551,
+ "completion_tokens": 353,
+ "latency_s": 1.97
+}

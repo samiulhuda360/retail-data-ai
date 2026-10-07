@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    SUM(line_total) / COUNT(DISTINCT transaction_id) AS answer\nFROM staging.stg_pos__transaction_lines t\nJOIN staging.stg_erp__stores s ON t.store_id = s.store_id\nWHERE s.store_name ILIKE '%Melbourne%'\n  AND t.txn_date >= '2026-02-01'\n  AND t.txn_date <= '2026-02-28'\n  AND t.txn_type = 'SALE'\n  AND t.is_valid = true;\n```"
+ },
+ "prompt_tokens": 1554,
+ "completion_tokens": 140,
+ "latency_s": 2.454
+}

@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_309702",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"start_date\":\"2025-12-01\",\"end_date\":\"2025-12-31\",\"metrics\":[\"roas\"],\"filters\":[{\"op\":\"=\",\"dimension\":\"marketing_channel\",\"value\":\"affiliate\"}],\"group_by\":[\"marketing_channel\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TapX8AtT4D34IsUyAFIsF4vjE2aqQYh0Ave7GraqkJWTQTsSi3VLhuel6w7/FWK8ykoQ70nQL+cJZWlTk5T2q/WdIfzwsOL82AeUAksNuHhPN9M2rP8WP6YQ="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1454,
+ "completion_tokens": 85,
+ "latency_s": 1.251
+}

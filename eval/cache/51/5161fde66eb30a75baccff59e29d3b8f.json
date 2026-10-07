@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_348237",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"start_date\":\"2025-04-01\",\"filters\":[{\"value\":\"Bakeware\",\"dimension\":\"product_category\",\"op\":\"=\"}],\"end_date\":\"2026-03-31\",\"metrics\":[\"gross_margin\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TsVLypiqAqx+iuRZMHy4NKnzA7wTfuGvscgZJf4gXaejuAf9qQEULpMEBNAePZCheQGmdqyk81/QPQbTnYv7cFgXDB5YVD1LhIj6pBYgwBoXfOqo53u69P40="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1451,
+ "completion_tokens": 76,
+ "latency_s": 3.011
+}

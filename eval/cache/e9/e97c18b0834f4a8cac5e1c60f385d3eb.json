@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_504387",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"order_by\":[{\"descending\":true,\"field\":\"roas\"}],\"group_by\":[\"marketing_channel\"],\"start_date\":\"2025-09-01\",\"end_date\":\"2025-09-30\",\"metrics\":[\"roas\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TcTAtmyjYQCPdbywaPWSFd+YGHzhz2Ze2NmAyhLB4J5S61WDxtHDKFDC7bOjR5/Be67onsknfcl1pK4xNMNAcHhbDPGql9YPNFOIuwfQfSgjArIwgXa0ISMU="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1455,
+ "completion_tokens": 78,
+ "latency_s": 1.457
+}

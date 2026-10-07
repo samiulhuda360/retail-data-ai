@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 11220.786348, \"explanation\": \"Online revenue attributed to email marketing in November 2025 was 11220.786348 NZD.\"}\n```"
+ },
+ "prompt_tokens": 1647,
+ "completion_tokens": 57,
+ "latency_s": 2.151
+}

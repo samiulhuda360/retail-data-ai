@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    CAST(SUM(t.line_total) AS DECIMAL(18, 4)) AS answer\nFROM staging.stg_pos__transaction_lines t\nJOIN staging.stg_erp__stores s ON t.store_id = s.store_id\nWHERE s.store_name ILIKE '%Wellington%'\n  AND t.txn_date >= DATE '2025-11-01'\n  AND t.txn_date <= DATE '2025-11-30'\n  AND t.is_valid = TRUE\n```"
+ },
+ "prompt_tokens": 1551,
+ "completion_tokens": 134,
+ "latency_s": 1.855
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 674425.529866, \"explanation\": \"Total revenue across all channels in February 2026 was 674425.529866 NZD.\"}"
+ },
+ "prompt_tokens": 1580,
+ "completion_tokens": 53,
+ "latency_s": 1.378
+}

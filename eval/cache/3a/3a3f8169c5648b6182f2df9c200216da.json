@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": \"Tableware\", \"explanation\": \"Tableware generated the highest revenue among all product categories in December 2025.\"}"
+ },
+ "prompt_tokens": 1740,
+ "completion_tokens": 30,
+ "latency_s": 1.288
+}

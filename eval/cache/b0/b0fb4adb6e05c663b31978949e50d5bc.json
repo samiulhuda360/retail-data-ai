@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 139973.903027, \"explanation\": \"The online store made 139973.903027 NZD in revenue in December 2025.\"}\n```"
+ },
+ "prompt_tokens": 1625,
+ "completion_tokens": 58,
+ "latency_s": 1.785
+}

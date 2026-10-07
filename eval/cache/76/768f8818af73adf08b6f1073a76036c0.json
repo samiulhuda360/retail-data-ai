@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 617, \"explanation\": \"The Wellington store had 617 sale orders in August 2025.\"}"
+ },
+ "prompt_tokens": 1665,
+ "completion_tokens": 31,
+ "latency_s": 1.311
+}

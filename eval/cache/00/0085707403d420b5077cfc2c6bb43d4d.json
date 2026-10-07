@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_284788",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"start_date\":\"2026-01-01\",\"metrics\":[\"gross_margin\"],\"filters\":[{\"value\":\"Kitchen Tools\",\"op\":\"=\",\"dimension\":\"product_category\"},{\"value\":\"online\",\"op\":\"=\",\"dimension\":\"sales_channel\"}],\"end_date\":\"2026-03-31\"}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0T81JISCzkucqmP2LenxZvA3SJ/2yx60TCXE8bHu7LDyU7zcm6VNgWCGD1pKhE1hxelIUdotYnC5vH5iaFaMnadLocTqVTolJq8QXaf+d998pO9ka6EcnWywE="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1457,
+ "completion_tokens": 96,
+ "latency_s": 1.379
+}

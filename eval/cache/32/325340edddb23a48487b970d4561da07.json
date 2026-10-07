@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_334404",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"filters\":[{\"dimension\":\"country\",\"value\":\"NZ\",\"op\":\"=\"}],\"start_date\":\"2025-05-01\",\"end_date\":\"2025-05-31\",\"metrics\":[\"revenue\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TF0RqCskcNvHu/zDCAfg7OYDGkG+LoKNMMsMjWkdpDa4Kqe8G9CY0nbn0M2sKJl5pqCc0Y4MDzLOA2NhvgG6ogL1lemz6GG7Kf3OS4Yn/FGZV5g71ZEThuiQ="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1452,
+ "completion_tokens": 71,
+ "latency_s": 1.372
+}

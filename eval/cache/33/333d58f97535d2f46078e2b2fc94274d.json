@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_309525",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"filters\":[{\"dimension\":\"region\",\"op\":\"=\",\"value\":\"Melbourne\"},{\"dimension\":\"sales_channel\",\"value\":\"store\",\"op\":\"=\"}],\"metrics\":[\"average_order_value\"],\"group_by\":[\"region\"],\"end_date\":\"2026-02-28\",\"start_date\":\"2026-02-01\"}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0The97D4RovfP6y8mvLTvh+/bYP7LPR2jpnPz7+KcEKKMfdW6EV6bPOg1M9nLckOTVJqDqudqmUGQl5lu/cdXF3tDvEHrEDCeJipnuY9WW3gA9KM2ld+hK0FI="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1455,
+ "completion_tokens": 103,
+ "latency_s": 1.724
+}

@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_336821",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"end_date\":\"2026-01-31\",\"filters\":[{\"dimension\":\"product_category\",\"op\":\"=\",\"value\":\"Food Storage\"}],\"start_date\":\"2026-01-01\",\"grain\":\"month\",\"metrics\":[\"gross_margin\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TUxAC1bpDljcdcnnFK1ncDdJJ5n8mntcSgQTYnpY/XyZ3TYniRq4geSEvD2/E2TKKmykXtyMTWJ3CQzrNzwvHpC+GLGF5I4nD+NbZi93xD5kqyjl+93kVZAM="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1454,
+ "completion_tokens": 82,
+ "latency_s": 1.661
+}

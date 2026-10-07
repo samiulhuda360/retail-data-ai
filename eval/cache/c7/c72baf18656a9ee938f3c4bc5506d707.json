@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": \"Coastal Couriers\", \"explanation\": \"Coastal Couriers recorded the lowest on-time delivery rate of 0.868 during the specified period.\"}"
+ },
+ "prompt_tokens": 1750,
+ "completion_tokens": 36,
+ "latency_s": 1.415
+}

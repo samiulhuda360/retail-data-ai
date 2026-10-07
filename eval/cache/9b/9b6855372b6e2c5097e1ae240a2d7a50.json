@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    sum(\n        CASE \n            WHEN t.currency = 'AUD' THEN t.line_total * fx.aud_nzd_rate\n            ELSE t.line_total\n        END\n    ) AS answer\nFROM staging.stg_pos__transaction_lines t\nJOIN staging.stg_erp__stores s ON t.store_id = s.store_id\nLEFT JOIN staging.stg_erp__fx_rates fx ON t.txn_date = fx.rate_date\nWHERE s.store_name LIKE '%Sydney%'\n  AND t.txn_date >= '2025-10-01'\n  AND t.txn_date <= '2025-10-31'\n  AND t.txn_type = 'SALE'\n  AND t.is_valid = true;\n```"
+ },
+ "prompt_tokens": 1552,
+ "completion_tokens": 194,
+ "latency_s": 3.865
+}

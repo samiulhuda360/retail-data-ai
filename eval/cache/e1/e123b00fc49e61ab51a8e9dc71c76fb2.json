@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 12356.44, \"explanation\": \"Total display advertising spend in Auckland for FY2026 was 12356.44 NZD.\"}\n```"
+ },
+ "prompt_tokens": 1682,
+ "completion_tokens": 48,
+ "latency_s": 1.555
+}

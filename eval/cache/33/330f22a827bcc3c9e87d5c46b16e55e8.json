@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": \"store\", \"explanation\": \"The store sales channel achieved the highest gross margin of 0.6085 over the financial year FY2026.\"}"
+ },
+ "prompt_tokens": 1685,
+ "completion_tokens": 38,
+ "latency_s": 2.385
+}

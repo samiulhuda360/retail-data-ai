@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_448385",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"metrics\":[\"orders\"],\"end_date\":\"2026-03-31\",\"filters\":[{\"value\":\"online\",\"dimension\":\"sales_channel\",\"op\":\"=\"},{\"dimension\":\"region\",\"value\":\"Sydney\",\"op\":\"=\"}],\"group_by\":[\"sales_channel\",\"region\"],\"start_date\":\"2026-03-01\",\"grain\":\"month\"}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TLtP0FSLjZNS77ErpGEnimT9BlY2uYsuQfKmD3z2Fs1/sKsG6DKXwpF+CMY4lbaIKVjiF0jvtyzepb0hgAdWHcEaRM5mlVTs08vItBMu1a83kn1yqIELUFow="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1454,
+ "completion_tokens": 111,
+ "latency_s": 1.381
+}

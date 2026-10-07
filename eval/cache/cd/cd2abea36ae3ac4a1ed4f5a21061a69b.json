@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nwith fx as (\n    select rate_date, aud_nzd_rate\n    from staging.stg_erp__fx_rates\n),\nmaterial_categories as (\n    select sku, product_category\n    from staging.stg_erp__materials\n    where sku is not null\n),\nall_rev as (\n    select\n        m.product_category,\n        p.line_total * case when p.currency = 'AUD' then coalesce(f.aud_nzd_rate, 1.0) else 1.0 end as rev\n    from staging.stg_pos__transaction_lines p\n    join staging.stg_erp__stores s on p.store_id = s.store_id\n    left join fx f on p.txn_date = f.rate_date\n    join material_categories m on p.sku = m.sku\n    where p.txn_date >= '2025-12-01' and p.txn_date <= '2025-12-31'\n      and p.txn_type = 'SALE'\n      and p.is_valid = true\n\n    union all\n\n    select\n        m.product_category,\n        (ol.line_total - coalesce(ol.discount_amount, 0)) * case when o.currency = 'AUD' then coalesce(f.aud_nzd_rate, 1.0) else 1.0 end as rev\n    from staging.stg_ecom__order_lines ol\n    join staging.stg_ecom__orders o on ol.order_id = o.order_id\n    left join fx f on o.order_date = f.rate_date\n    join material_categories m on ol.sku = m.sku\n    where o.order_date >= '2025-12-01' and o.order_date <= '2025-12-31'\n      and o.order_status != 'Cancelled'\n\n    union all\n\n    select\n        m.product_category,\n        sol.net_value * case when sol.currency = 'AUD' then coalesce(f.aud_nzd_rate, 1.0) else 1.0 end as rev\n    from staging.stg_erp__sales_order_lines sol\n    left join fx f on sol.order_date = f.rate_date\n    join staging.stg_erp__materials m on sol.material_id = m.material_id\n    where sol.order_date >= '2025-12-01' and sol.order_date <= '2025-12-31'\n)\nselect product_category as answer\nfrom all_rev\ngroup by 1\norder by sum(rev) desc\nlimit 1;\n```"
+ },
+ "prompt_tokens": 2300,
+ "completion_tokens": 645,
+ "latency_s": 2.741
+}

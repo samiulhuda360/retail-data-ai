@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 39522.55, \"explanation\": \"Christchurch's revenue during the week of 24 to 30 November 2025 was 39522.55 NZD.\"}\n```"
+ },
+ "prompt_tokens": 1619,
+ "completion_tokens": 58,
+ "latency_s": 1.698
+}

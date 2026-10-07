@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT sum(\n    CASE \n        WHEN a.currency = 'AUD' THEN a.spend_local * coalesce(f.aud_nzd_rate, 1.0)\n        ELSE a.spend_local \n    END\n) AS answer\nFROM staging.stg_marketing__ad_spend a\nLEFT JOIN staging.stg_erp__fx_rates f ON a.spend_date = f.rate_date\nJOIN reference.regions r ON a.region_code = r.region_code\nWHERE a.spend_date >= '2025-04-01' \n  AND a.spend_date <= '2026-03-31'\n  AND lower(a.marketing_channel) LIKE '%display%'\n  AND lower(r.region_name) = 'auckland';\n```"
+ },
+ "prompt_tokens": 1551,
+ "completion_tokens": 192,
+ "latency_s": 2.706
+}

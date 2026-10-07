@@ -1,0 +1,285 @@
+{
+ "run_at": "2026-10-07T08:10:31Z",
+ "rows": [
+  {
+   "id": "q01",
+   "split": "dev",
+   "expected": 10284768.368603,
+   "answer": 10284713.745461,
+   "correct": true
+  },
+  {
+   "id": "q02",
+   "split": "dev",
+   "expected": 139973.903027,
+   "answer": 139973.903027,
+   "correct": true
+  },
+  {
+   "id": "q03",
+   "split": "dev",
+   "expected": 1169912.335458,
+   "answer": 1169912.335458,
+   "correct": true
+  },
+  {
+   "id": "q04",
+   "split": "dev",
+   "expected": 116326.883455,
+   "answer": 116326.883455,
+   "correct": true
+  },
+  {
+   "id": "q05",
+   "split": "dev",
+   "expected": 0.472408,
+   "answer": 0.472404,
+   "correct": true
+  },
+  {
+   "id": "q06",
+   "split": "dev",
+   "expected": 0.462808,
+   "answer": 0.462808,
+   "correct": true
+  },
+  {
+   "id": "q07",
+   "split": "dev",
+   "expected": "Tableware",
+   "answer": "Tableware",
+   "correct": true
+  },
+  {
+   "id": "q08",
+   "split": "dev",
+   "expected": "Wellington",
+   "answer": "Wellington",
+   "correct": true
+  },
+  {
+   "id": "q09",
+   "split": "dev",
+   "expected": 77.047649,
+   "answer": 77.047649,
+   "correct": true
+  },
+  {
+   "id": "q10",
+   "split": "dev",
+   "expected": 3157.718233,
+   "answer": 3157.718233,
+   "correct": true
+  },
+  {
+   "id": "q11",
+   "split": "dev",
+   "expected": 617.0,
+   "answer": 617,
+   "correct": true
+  },
+  {
+   "id": "q12",
+   "split": "dev",
+   "expected": 4.180439,
+   "answer": 4.180439,
+   "correct": true
+  },
+  {
+   "id": "q13",
+   "split": "dev",
+   "expected": 2.566585,
+   "answer": 2.566585,
+   "correct": true
+  },
+  {
+   "id": "q14",
+   "split": "dev",
+   "expected": 15542.299206,
+   "answer": 15542.299206,
+   "correct": true
+  },
+  {
+   "id": "q15",
+   "split": "dev",
+   "expected": "email",
+   "answer": "email",
+   "correct": true
+  },
+  {
+   "id": "q16",
+   "split": "dev",
+   "expected": 0.835562,
+   "answer": 0.835562,
+   "correct": true
+  },
+  {
+   "id": "q17",
+   "split": "dev",
+   "expected": 0.867739,
+   "answer": 0.867739,
+   "correct": true
+  },
+  {
+   "id": "q18",
+   "split": "dev",
+   "expected": "Coastal Couriers",
+   "answer": "Coastal Couriers",
+   "correct": true
+  },
+  {
+   "id": "q19",
+   "split": "dev",
+   "expected": 11148.0,
+   "answer": 11148,
+   "correct": true
+  },
+  {
+   "id": "q20",
+   "split": "dev",
+   "expected": 466489.2,
+   "answer": 466489.2,
+   "correct": true
+  },
+  {
+   "id": "q21",
+   "split": "dev",
+   "expected": 0.297994,
+   "answer": 0.297994,
+   "correct": true
+  },
+  {
+   "id": "q22",
+   "split": "dev",
+   "expected": 11220.786348,
+   "answer": 11220.786348,
+   "correct": true
+  },
+  {
+   "id": "q23",
+   "split": "dev",
+   "expected": 82.404179,
+   "answer": 82.404179,
+   "correct": true
+  },
+  {
+   "id": "q24",
+   "split": "dev",
+   "expected": 39522.55,
+   "answer": 39522.55,
+   "correct": true
+  },
+  {
+   "id": "q25",
+   "split": "dev",
+   "expected": "store",
+   "answer": "store",
+   "correct": true
+  },
+  {
+   "id": "q26",
+   "split": "dev",
+   "expected": 12356.44,
+   "answer": 12356.44,
+   "correct": true
+  },
+  {
+   "id": "q27",
+   "split": "dev",
+   "expected": 0.890909,
+   "answer": 0.890909,
+   "correct": true
+  },
+  {
+   "id": "q28",
+   "split": "dev",
+   "expected": 67869.3,
+   "answer": 67869.3,
+   "correct": true
+  },
+  {
+   "id": "q29",
+   "split": "dev",
+   "expected": 0.642357,
+   "answer": 0.642357,
+   "correct": true
+  },
+  {
+   "id": "q30",
+   "split": "dev",
+   "expected": 148.0,
+   "answer": 148,
+   "correct": true
+  },
+  {
+   "id": "q31",
+   "split": "holdout",
+   "expected": 674425.529866,
+   "answer": 674425.529866,
+   "correct": true
+  },
+  {
+   "id": "q32",
+   "split": "holdout",
+   "expected": "Melbourne",
+   "answer": "Melbourne",
+   "correct": true
+  },
+  {
+   "id": "q33",
+   "split": "holdout",
+   "expected": 5.478575,
+   "answer": 5.478575,
+   "correct": true
+  },
+  {
+   "id": "q34",
+   "split": "holdout",
+   "expected": 0.566044,
+   "answer": 0.566044,
+   "correct": true
+  },
+  {
+   "id": "q35",
+   "split": "holdout",
+   "expected": 0.879779,
+   "answer": 0.879779,
+   "correct": true
+  },
+  {
+   "id": "q36",
+   "split": "holdout",
+   "expected": 23046.0,
+   "answer": 23046,
+   "correct": true
+  },
+  {
+   "id": "q37",
+   "split": "holdout",
+   "expected": "paid_social",
+   "answer": "paid_social",
+   "correct": true
+  },
+  {
+   "id": "q38",
+   "split": "holdout",
+   "expected": 46260.673258,
+   "answer": 46260.673258,
+   "correct": true
+  },
+  {
+   "id": "q39",
+   "split": "holdout",
+   "expected": 110.931528,
+   "answer": 110.931528,
+   "correct": true
+  },
+  {
+   "id": "q40",
+   "split": "holdout",
+   "expected": 103019.590994,
+   "answer": 103019.590994,
+   "correct": true
+  }
+ ]
+}

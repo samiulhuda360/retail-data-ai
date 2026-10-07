@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_303423",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"group_by\":[\"carrier\"],\"start_date\":\"2025-04-01\",\"end_date\":\"2026-02-28\",\"metrics\":[\"on_time_delivery_rate\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TZJHvCn8ypsjWZDDX15tlunIFqX1Wh5b9NQXavK7eGtWRc4R3pYW/UR/TorVlbkBQ17sspEB2WZqXvEJ2LwdL90M0OZ9b6/hdd/We5VxQzjQhJQnHuPiRklw="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1462,
+ "completion_tokens": 64,
+ "latency_s": 1.181
+}

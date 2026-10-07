@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 0.8797789037309995, \"explanation\": \"The on-time delivery rate in Australia for deliveries promised between October 2025 and February 2026 was approximately 87.98%.\"}"
+ },
+ "prompt_tokens": 1648,
+ "completion_tokens": 63,
+ "latency_s": 1.39
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nWITH paid_search_spend AS (\n    SELECT \n        SUM(CASE \n            WHEN a.currency = 'AUD' THEN a.spend_local * f.aud_nzd_rate \n            ELSE a.spend_local \n        END) AS ad_spend\n    FROM staging.stg_marketing__ad_spend a\n    JOIN reference.marketing_channels mc ON a.marketing_channel = mc.marketing_channel\n    LEFT JOIN staging.stg_erp__fx_rates f ON a.spend_date = f.rate_date\n    WHERE a.spend_date >= '2025-10-01' \n      AND a.spend_date <= '2025-12-31'\n      AND mc.is_paid = TRUE\n      AND (LOWER(a.marketing_channel) LIKE '%search%' OR LOWER(mc.channel_name) LIKE '%search%')\n),\npaid_search_revenue AS (\n    SELECT \n        SUM(CASE \n            WHEN o.currency = 'AUD' THEN (ol.line_total) * f.aud_nzd_rate \n            ELSE ol.line_total \n        END) AS attributed_revenue\n    FROM staging.stg_ecom__orders o\n    JOIN staging.stg_ecom__order_lines ol ON o.order_id = ol.order_id\n    JOIN reference.marketing_channels mc ON o.marketing_channel = mc.marketing_channel\n    LEFT JOIN staging.stg_erp__fx_rates f ON o.order_date = f.rate_date\n    WHERE o.order_date >= '2025-10-01' \n      AND o.order_date <= '2025-12-31'\n      AND o.order_status != 'cancelled'\n      AND mc.is_paid = TRUE\n      AND (LOWER(o.marketing_channel) LIKE '%search%' OR LOWER(mc.channel_name) LIKE '%search%')\n)\nSELECT \n    ROUND(COALESCE(r.attributed_revenue, 0) / NULLIF(s.ad_spend, 0), 4) AS answer\nFROM paid_search_spend s\nCROSS JOIN paid_search_revenue r;\n```"
+ },
+ "prompt_tokens": 1556,
+ "completion_tokens": 519,
+ "latency_s": 2.397
+}

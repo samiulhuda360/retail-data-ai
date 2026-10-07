@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_404086",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"start_date\":\"2025-04-01\",\"filters\":[{\"value\":\"Coastal Couriers\",\"dimension\":\"carrier\",\"op\":\"=\"}],\"end_date\":\"2026-02-28\",\"metrics\":[\"on_time_delivery_rate\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0Tr2A+SFPPOc8x7Z2dMsts888Za1FfpKq2oKpG60ouImdu0KfXlQD/PmkajgjV73C03KEXje+LRDicK80juh/ln7u6R5WM42jsEexMTSz98skLXcMZf47Rdwc="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1463,
+ "completion_tokens": 79,
+ "latency_s": 1.395
+}

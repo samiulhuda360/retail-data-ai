@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    CAST(SUM(CASE WHEN is_on_time THEN 1 ELSE 0 END) AS DOUBLE) / COUNT(*) AS answer\nFROM staging.stg_logistics__shipments\nWHERE sales_channel = 'wholesale'\n  AND promised_date >= DATE '2025-11-01'\n  AND promised_date <= DATE '2025-11-30';\n```"
+ },
+ "prompt_tokens": 1556,
+ "completion_tokens": 97,
+ "latency_s": 1.822
+}

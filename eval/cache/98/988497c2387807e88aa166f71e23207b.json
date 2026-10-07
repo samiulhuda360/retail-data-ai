@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    CAST(SUM(quantity) AS DOUBLE) AS answer\nFROM staging.stg_erp__sales_order_lines\nWHERE order_date >= DATE '2025-10-01' \n  AND order_date <= DATE '2025-10-31';\n```"
+ },
+ "prompt_tokens": 1551,
+ "completion_tokens": 74,
+ "latency_s": 1.426
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 23046, \"explanation\": \"Wholesale customers bought 23046 units in October 2025.\"}\n```"
+ },
+ "prompt_tokens": 1637,
+ "completion_tokens": 39,
+ "latency_s": 1.494
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nWITH sep_spend AS (\n    SELECT \n        m.marketing_channel,\n        SUM(\n            CASE \n                WHEN s.currency = 'AUD' THEN s.spend_local * COALESCE(f.aud_nzd_rate, 1.0)\n                ELSE s.spend_local\n            END\n        ) AS ad_spend\n    FROM staging.stg_marketing__ad_spend s\n    JOIN reference.marketing_channels m ON s.marketing_channel = m.marketing_channel\n    LEFT JOIN staging.stg_erp__fx_rates f ON s.spend_date = f.rate_date\n    WHERE s.spend_date >= '2025-09-01' AND s.spend_date <= '2025-09-30'\n      AND m.is_paid = TRUE\n    GROUP BY m.marketing_channel\n),\nsep_revenue AS (\n    SELECT \n        o.marketing_channel,\n        SUM(\n            CASE \n                WHEN o.currency = 'AUD' THEN l.line_total * COALESCE(f.aud_nzd_rate, 1.0)\n                ELSE l.line_total\n            END\n        ) AS attributed_revenue\n    FROM staging.stg_ecom__orders o\n    JOIN staging.stg_ecom__order_lines l ON o.order_id = l.order_id\n    LEFT JOIN staging.stg_erp__fx_rates f ON o.order_date = f.rate_date\n    WHERE o.order_date >= '2025-09-01' AND o.order_date <= '2025-09-30'\n      AND o.order_status != 'cancelled'\n      AND o.marketing_channel IS NOT NULL\n    GROUP BY o.marketing_channel\n)\nSELECT \n    COALESCE(r.marketing_channel, s.marketing_channel) AS answer\nFROM sep_spend s\nFULL OUTER JOIN sep_revenue r ON s.marketing_channel = r.marketing_channel\nWHERE COALESCE(s.ad_spend, 0) > 0\nORDER BY (COALESCE(r.attributed_revenue, 0) / s.ad_spend) DESC\nLIMIT 1;\n```"
+ },
+ "prompt_tokens": 1554,
+ "completion_tokens": 524,
+ "latency_s": 2.456
+}

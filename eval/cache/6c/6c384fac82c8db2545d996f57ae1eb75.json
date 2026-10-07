@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 0.6423572281237419, \"explanation\": \"The gross margin on Kitchen Tools sold online from January to March 2026 was approximately 64.24%.\"}\n```"
+ },
+ "prompt_tokens": 1658,
+ "completion_tokens": 60,
+ "latency_s": 1.371
+}

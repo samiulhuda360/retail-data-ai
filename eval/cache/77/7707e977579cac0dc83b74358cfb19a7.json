@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    SUM(order_revenue) / COUNT(order_id) AS answer\nFROM (\n    SELECT \n        o.order_id,\n        o.items_subtotal AS order_revenue\n    FROM staging.stg_ecom__orders o\n    WHERE o.order_date >= '2025-11-01' \n      AND o.order_date <= '2025-11-30'\n      AND o.order_status != 'cancelled'\n) t;\n```"
+ },
+ "prompt_tokens": 1553,
+ "completion_tokens": 123,
+ "latency_s": 1.797
+}

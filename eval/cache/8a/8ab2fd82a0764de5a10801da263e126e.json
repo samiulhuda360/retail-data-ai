@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": \"Tableware\", \"explanation\": \"Tableware brought in the highest revenue of 295575.29119 in December 2025.\"}\n```"
+ },
+ "prompt_tokens": 1740,
+ "completion_tokens": 46,
+ "latency_s": 1.314
+}

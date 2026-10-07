@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 67869.3, \"explanation\": \"The Wellington store revenue in November 2025 was 67869.3 NZD.\"}\n```"
+ },
+ "prompt_tokens": 1630,
+ "completion_tokens": 45,
+ "latency_s": 1.417
+}

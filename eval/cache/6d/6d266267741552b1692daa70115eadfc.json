@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_354757",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"end_date\":\"2026-02-28\",\"start_date\":\"2025-10-01\",\"filters\":[{\"value\":\"AU\",\"op\":\"=\",\"dimension\":\"country\"}],\"metrics\":[\"on_time_delivery_rate\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0T92iWRayPhiURydMZeDC6onACsmxcKxGc8ER3Bvhmzua4VUQ6ABKIeAgtIv207LkCErHesNFeH1A4DM1AMmdcAhlKBpvHhiOSvu2V76k1ob05YWhD/xrDJv8="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1465,
+ "completion_tokens": 77,
+ "latency_s": 1.197
+}

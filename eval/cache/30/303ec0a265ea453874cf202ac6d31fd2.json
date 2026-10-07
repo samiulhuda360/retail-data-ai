@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 0.8909090909090909, \"explanation\": \"The on-time delivery rate for wholesale shipments in November 2025 was approximately 89.09%.\"}"
+ },
+ "prompt_tokens": 1671,
+ "completion_tokens": 54,
+ "latency_s": 1.454
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 1169912.335458, \"explanation\": \"Wholesale revenue for the period July to September 2025 was 1169912.335458 NZD.\"}\n```"
+ },
+ "prompt_tokens": 1618,
+ "completion_tokens": 62,
+ "latency_s": 1.9
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 10284713.745461, \"explanation\": \"Total revenue across all channels for the financial year 2026 was 10284713.745461.\"}"
+ },
+ "prompt_tokens": 1602,
+ "completion_tokens": 57,
+ "latency_s": 1.798
+}

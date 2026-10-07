@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nWITH spend_nzd AS (\n    SELECT\n        SUM(\n            CASE \n                WHEN s.currency = 'AUD' THEN s.spend_local * COALESCE(f.aud_nzd_rate, 1.0)\n                ELSE s.spend_local\n            END\n        ) AS total_ad_spend\n    FROM staging.stg_marketing__ad_spend AS s\n    LEFT JOIN staging.stg_erp__fx_rates AS f ON s.spend_date = f.rate_date\n    WHERE s.spend_date >= '2025-12-01' \n      AND s.spend_date <= '2025-12-31'\n      AND LOWER(s.marketing_channel) = 'affiliate'\n),\nattributed_rev AS (\n    SELECT\n        SUM(\n            CASE \n                WHEN o.currency = 'AUD' THEN (o.order_total - COALESCE(o.shipping_fee, 0)) * COALESCE(f.aud_nzd_rate, 1.0)\n                ELSE (o.order_total - COALESCE(o.shipping_fee, 0))\n            END\n        ) AS total_attributed_revenue\n    FROM staging.stg_ecom__orders AS o\n    LEFT JOIN staging.stg_erp__fx_rates AS f ON o.order_date = f.rate_date\n    WHERE o.order_date >= '2025-12-01'\n      AND o.order_date <= '2025-12-31'\n      AND o.order_status <> 'cancelled'\n      AND LOWER(o.marketing_channel) = 'affiliate'\n)\nSELECT \n    CASE \n        WHEN COALESCE(s.total_ad_spend, 0) = 0 THEN 0.0\n        ELSE COALESCE(r.total_attributed_revenue, 0.0) / s.total_ad_spend\n    END AS answer\nFROM spend_nzd AS s\nCROSS JOIN attributed_rev AS r\n```"
+ },
+ "prompt_tokens": 1553,
+ "completion_tokens": 480,
+ "latency_s": 2.33
+}

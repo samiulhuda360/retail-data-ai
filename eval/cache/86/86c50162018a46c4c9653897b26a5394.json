@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    CAST(SUM(\n        CASE \n            WHEN a.currency = 'AUD' THEN a.spend_local * COALESCE(f.aud_nzd_rate, 1.0)\n            ELSE a.spend_local\n        END\n    ) AS DECIMAL(18,2)) AS answer\nFROM staging.stg_marketing__ad_spend a\nLEFT JOIN staging.stg_erp__fx_rates f \n    ON a.spend_date = f.rate_date\nWHERE a.spend_date >= DATE '2026-01-01' \n  AND a.spend_date <= DATE '2026-01-31';\n```"
+ },
+ "prompt_tokens": 1555,
+ "completion_tokens": 162,
+ "latency_s": 1.917
+}

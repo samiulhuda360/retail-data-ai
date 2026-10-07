@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT ad_spend.marketing_channel AS answer\nFROM staging.stg_marketing__ad_spend AS ad_spend\nJOIN reference.marketing_channels AS mc\n  ON ad_spend.marketing_channel = mc.marketing_channel\nWHERE ad_spend.spend_date >= '2025-04-01'\n  AND ad_spend.spend_date <= '2026-03-31'\n  AND mc.is_paid = TRUE\nGROUP BY ad_spend.marketing_channel\nORDER BY SUM(\n  CASE \n    WHEN ad_spend.currency = 'AUD' THEN ad_spend.spend_local * COALESCE(fx.aud_nzd_rate, 1.0)\n    ELSE ad_spend.spend_local \n  END\n) DESC\nLIMIT 1;\n```"
+ },
+ "prompt_tokens": 1551,
+ "completion_tokens": 191,
+ "latency_s": 1.731
+}

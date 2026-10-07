@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_405164",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"filters\":[{\"op\":\"=\",\"value\":\"online\",\"dimension\":\"sales_channel\"},{\"value\":\"email\",\"dimension\":\"marketing_channel\",\"op\":\"=\"}],\"metrics\":[\"attributed_revenue\"],\"start_date\":\"2025-11-01\",\"end_date\":\"2025-11-30\"}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0T2G1QARoiGXovBbTqEe/7NkvjdLv4ganAGSIFNhdLypoi+4FVJ/lFLoUbeLELtYmm2dlrHI/yFv3/kBJAOoZYrNPLX7+qdO/HvHZOY98Y1hTbcGLO4z/48mc="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1454,
+ "completion_tokens": 95,
+ "latency_s": 1.829
+}

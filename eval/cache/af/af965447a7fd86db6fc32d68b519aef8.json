@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": \"Melbourne\", \"explanation\": \"Melbourne had the highest average online order value of 77.76 over the financial year.\"}"
+ },
+ "prompt_tokens": 1779,
+ "completion_tokens": 31,
+ "latency_s": 1.144
+}

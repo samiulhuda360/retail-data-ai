@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nWITH online_orders AS (\n    SELECT\n        o.region_code,\n        o.order_id,\n        o.items_subtotal - o.discount_total AS order_revenue\n    FROM staging.stg_ecom__orders o\n    WHERE o.order_date >= '2025-04-01'\n      AND o.order_date <= '2026-03-31'\n      AND o.order_status <> 'CANCELLED'\n)\nSELECT region_code AS answer\nFROM online_orders\nGROUP BY region_code\nORDER BY AVG(order_revenue) DESC\nLIMIT 1;\n```"
+ },
+ "prompt_tokens": 1550,
+ "completion_tokens": 151,
+ "latency_s": 1.644
+}

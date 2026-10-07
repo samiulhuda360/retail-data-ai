@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_95269",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"metrics\":[\"average_order_value\"],\"filters\":[{\"dimension\":\"sales_channel\",\"op\":\"=\",\"value\":\"wholesale\"}],\"end_date\":\"2026-03-31\",\"start_date\":\"2025-04-01\"}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0ToaRJnI/7Uek2EOc6IZ54zkV5a3JiDPsczumSB58DZpWJp4H6TpJlIEMXPJj4tNR6H+heiLx4c6K4ZXi5vKgvbs92VdhKnDl3iJSMsfxE7hcMbYtHAdTLs3s="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1449,
+ "completion_tokens": 77,
+ "latency_s": 1.376
+}

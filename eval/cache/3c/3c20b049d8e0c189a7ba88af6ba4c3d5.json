@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 15542.299205999998, \"explanation\": \"Total ad spend in January 2026 was 15542.299205999998 NZD.\"}"
+ },
+ "prompt_tokens": 1597,
+ "completion_tokens": 61,
+ "latency_s": 1.333
+}

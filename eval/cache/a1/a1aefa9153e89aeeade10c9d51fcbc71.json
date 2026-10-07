@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 103019.590994, \"explanation\": \"Online revenue from Australian customers between October and December 2025 was 103019.590994 NZD.\"}\n```"
+ },
+ "prompt_tokens": 1637,
+ "completion_tokens": 60,
+ "latency_s": 1.156
+}

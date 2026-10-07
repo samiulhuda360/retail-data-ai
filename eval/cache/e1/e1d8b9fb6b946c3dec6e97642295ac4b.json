@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    sum(\n        CASE \n            WHEN o.currency = 'AUD' THEN l.line_total * fx.aud_nzd_rate\n            ELSE l.line_total\n        END\n    ) AS answer\nFROM staging.stg_ecom__orders o\nJOIN staging.stg_ecom__order_lines l ON o.order_id = l.order_id\nLEFT JOIN staging.stg_erp__fx_rates fx ON o.order_date = fx.rate_date\nWHERE o.order_date >= '2025-12-01' \n  AND o.order_date <= '2025-12-31'\n  AND o.order_status != 'CANCELLED';\n```"
+ },
+ "prompt_tokens": 1552,
+ "completion_tokens": 175,
+ "latency_s": 3.017
+}

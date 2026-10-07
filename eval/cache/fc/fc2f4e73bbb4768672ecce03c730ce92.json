@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nWITH fx AS (\n    SELECT rate_date, aud_nzd_rate\n    FROM staging.stg_erp__fx_rates\n),\npos_rev AS (\n    SELECT \n        SUM(\n            CASE \n                WHEN t.currency = 'AUD' THEN t.line_total * COALESCE(f.aud_nzd_rate, 1)\n                ELSE t.line_total\n            END\n        ) AS rev\n    FROM staging.stg_pos__transaction_lines t\n    JOIN staging.stg_erp__stores s ON t.store_id = s.store_id\n    LEFT JOIN fx f ON t.txn_date = f.rate_date\n    WHERE t.txn_date BETWEEN '2025-04-01' AND '2026-03-31'\n      AND t.is_valid = true\n),\necom_rev AS (\n    SELECT \n        SUM(\n            CASE \n                WHEN o.currency = 'AUD' THEN l.line_total * COALESCE(f.aud_nzd_rate, 1)\n                ELSE l.line_total\n            END\n        ) AS rev\n    FROM staging.stg_ecom__order_lines l\n    JOIN staging.stg_ecom__orders o ON l.order_id = o.order_id\n    LEFT JOIN fx f ON o.order_date = f.rate_date\n    WHERE o.order_date BETWEEN '2025-04-01' AND '2026-03-31'\n      AND o.order_status != 'CANCELLED'\n),\nerp_rev AS (\n    SELECT \n        SUM(\n            CASE \n                WHEN l.currency = 'AUD' THEN l.net_value * COALESCE(f.aud_nzd_rate, 1)\n                ELSE l.net_value\n            END\n        ) AS rev\n    FROM staging.stg_erp__sales_order_lines l\n    LEFT JOIN fx f ON l.order_date = f.rate_date\n    WHERE l.order_date BETWEEN '2025-04-01' AND '2026-03-31'\n)\nSELECT (COALESCE((SELECT rev FROM pos_rev), 0) + COALESCE((SELECT rev FROM ecom_rev), 0) + COALESCE((SELECT rev FROM erp_rev), 0)) AS answer\n```"
+ },
+ "prompt_tokens": 1563,
+ "completion_tokens": 569,
+ "latency_s": 3.055
+}

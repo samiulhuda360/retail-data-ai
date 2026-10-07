@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": \"paid_social\", \"explanation\": \"Paid social had the highest ad spend of 82106.58 over the financial year.\"}\n```"
+ },
+ "prompt_tokens": 1771,
+ "completion_tokens": 40,
+ "latency_s": 1.294
+}

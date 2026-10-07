@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    sum(\n        CASE \n            WHEN o.currency = 'AUD' THEN o.items_subtotal - o.discount_total\n            ELSE (o.items_subtotal - o.discount_total) * coalesce(f.aud_nzd_rate, 1)\n        not null\n        END\n    ) AS answer\nFROM staging.stg_ecom__orders o\nLEFT JOIN staging.stg_erp__fx_rates f ON o.order_date = f.rate_date\nWHERE o.order_date >= '2025-10-01' \n  AND o.order_date <= '2025-12-31'\n  AND o.order_status != 'CANCELLED'\n  AND o.region_code LIKE 'AU%'\n```"
+ },
+ "prompt_tokens": 1554,
+ "completion_tokens": 187,
+ "latency_s": 1.732
+}

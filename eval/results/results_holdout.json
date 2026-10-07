@@ -1,0 +1,736 @@
+{
+ "run_at": "2026-10-07T07:43:05Z",
+ "model": "gemini-flash-lite-latest",
+ "live_calls": 34,
+ "cached_calls": 0,
+ "summary": [
+  {
+   "system": "baseline",
+   "split": "holdout",
+   "questions": 10,
+   "correct": 6,
+   "accuracy": 0.6,
+   "latency_mean_s": 3.14,
+   "latency_median_s": 3.31,
+   "latency_p90_s": 3.94,
+   "tokens_per_question": 2777,
+   "llm_calls": 14,
+   "cached_calls": 0,
+   "cost_usd": 0.0043,
+   "errors": 2
+  },
+  {
+   "system": "baseline",
+   "split": "all",
+   "questions": 10,
+   "correct": 6,
+   "accuracy": 0.6,
+   "latency_mean_s": 3.14,
+   "latency_median_s": 3.31,
+   "latency_p90_s": 3.94,
+   "tokens_per_question": 2777,
+   "llm_calls": 14,
+   "cached_calls": 0,
+   "cost_usd": 0.0043,
+   "errors": 2
+  },
+  {
+   "system": "semantic_agent",
+   "split": "holdout",
+   "questions": 10,
+   "correct": 10,
+   "accuracy": 1.0,
+   "latency_mean_s": 2.7,
+   "latency_median_s": 2.64,
+   "latency_p90_s": 2.91,
+   "tokens_per_question": 3242,
+   "llm_calls": 20,
+   "cached_calls": 0,
+   "cost_usd": 0.0036,
+   "errors": 0
+  },
+  {
+   "system": "semantic_agent",
+   "split": "all",
+   "questions": 10,
+   "correct": 10,
+   "accuracy": 1.0,
+   "latency_mean_s": 2.7,
+   "latency_median_s": 2.64,
+   "latency_p90_s": 2.91,
+   "tokens_per_question": 3242,
+   "llm_calls": 20,
+   "cached_calls": 0,
+   "cost_usd": 0.0036,
+   "errors": 0
+  }
+ ],
+ "rows": [
+  {
+   "id": "q31",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "What was total revenue across all channels in February 2026?",
+   "kind": "number",
+   "expected": 674425.529866,
+   "answer": "674425.49",
+   "correct": true,
+   "error": "",
+   "latency_s": 5.249,
+   "llm_calls": 1,
+   "cached_calls": 0,
+   "prompt_tokens": 1551,
+   "completion_tokens": 1284,
+   "cost_usd": 0.000669,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "WITH fx AS (\n    SELECT rate_date, aud_nzd_rate\n    FROM staging.stg_erp__fx_rates\n),\npos_rev AS (\n    -- POS: net of refunds. txn_type 'SALE' vs 'REFUND' (or similar, typically line_total is negative for refunds or managed via txn_type).\n    -- Actually, pos transaction lines have line_total. Let's sum line_total for valid transactions in Feb 2026.\n    -- Wait, are Australian store amounts in AUD? \"Australian amounts are in AUD; convert with staging.stg_erp__fx_rates\".\n    -- Let's check store currency via staging.stg_erp__stores.\n    SELECT \n        t.txn_date AS dt,\n        s.currency AS curr,\n        SUM(t.line_total) AS amt\n    FROM staging.stg_pos__transaction_lines t\n    JOIN staging.stg_erp__stores s ON t.store_id = s.store_id\n    WHERE t.txn_date >= '2026-02-01' AND t.txn_date <= '2026-02-28'\n      AND t.is_valid = true\n    GROUP BY 1, 2\n),\npos_nzd AS (\n    SELECT \n        SUM(\n            CASE \n                WHEN p.curr = 'AUD' THEN p.amt * COALESCE(fx.aud_nzd_rate, 1.0)\n                ELSE p.amt \n            END\n        ) AS rev\n    FROM pos_rev p\n    LEFT JOIN fx ON p.dt = fx.rate_date\n),\necom_rev AS (\n    -- Web shop: completed orders, net of refunds? \n    -- \"Revenue in NZD across store, online and wholesale, net of refunds. Excludes shipping fees and cancelled web orders.\"\n    -- Let's check stg_ecom__orders and stg_ecom__order_lines.\n    -- Exclude cancelled web orders (order_status != 'cancelled' or similar). Let's check order_status values or use items_subtotal minus discount_total? \n    -- Wait, stg_ecom__order_lines has line_total. If there are refunds in ecom, how are they represented? \n    -- Let's inspect ecom orders where order_date is in Feb 2026 and status != 'cancelled'.\n    -- Wait, items_subtotal - discount_total gives order merchandise total before shipping. But what about refunds? \n    -- Let's check if stg_ecom__orders has refunds or if order lines represent net. Let's sum line_total from order lines for valid non-cancelled orders, \n    -- OR items_subtotal - discount_total for non-cancelled orders. Let's check if there are ecom refund lines or separate refund tables. \n    -- Usually, ecom order lines are the items ordered. If refunds happen, are they in order lines or negative quantities? \n    -- Let's check order lines for orders in Feb 2026.\n    SELECT \n        o.order_date AS dt,\n        o.currency AS curr,\n        SUM(l.line_total) AS amt\n    FROM staging.stg_ecom__orders o\n    JOIN staging.stg_ecom__order_lines l ON o.order_id = l.order_id\n    WHERE o.order_date >= '2026-02-01' AND o.order_date <= '2026-02-28'\n      AND o.order_status NOT ILIKE '%cancel%'\n    GROUP BY 1, 2\n),\necom_nzd AS (\n    SELECT \n        SUM(\n            CASE \n                WHEN e.curr = 'AUD' THEN e.amt * COALESCE(fx.aud_nzd_rate, 1.0)\n                ELSE e.amt \n            END\n        ) AS rev\n    FROM ecom_rev e\n    LEFT JOIN fx ON e.dt = fx.rate_date\n),\nerp_rev AS (\n    -- Wholesale customers (ERP sales orders): net_value in stg_erp__sales_order_lines.\n    -- Are ERP orders in AUD or NZD? Let's check currency column in stg_erp__sales_order_lines.\n    -- \"Australian amounts are in AUD; convert with staging.stg_erp__fx_rates\"\n    SELECT \n        l.order_date AS dt,\n        l.currency AS curr,\n        SUM(l.net_value) AS amt\n    FROM staging.stg_erp__sales_order_lines l\n    WHERE l.order_date >= '2026-02-01' AND l.order_date <= '2026-02-28'\n    GROUP BY 1, 2\n),\nerp_nzd AS (\n    SELECT \n        SUM(\n            CASE \n                WHEN e.curr = 'AUD' THEN e.amt * COALESCE(fx.aud_nzd_rate, 1.0)\n                ELSE e.amt \n            END\n        ) AS rev\n    FROM erp_rev e\n    LEFT JOIN fx ON e.dt = fx.rate_date\n)\nSELECT \n    COALESCE((SELECT rev FROM pos_nzd), 0) + \n    COALESCE((SELECT rev FROM ecom_nzd), 0) + \n    COALESCE((SELECT rev FROM erp_nzd), 0) AS answer"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q31",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "What was total revenue across all channels in February 2026?",
+   "kind": "number",
+   "expected": 674425.529866,
+   "answer": 674425.529866,
+   "correct": true,
+   "error": "",
+   "latency_s": 2.907,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3032,
+   "completion_tokens": 103,
+   "cost_usd": 0.000344,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "start_date": "2026-02-01",
+      "metrics": [
+       "revenue"
+      ],
+      "end_date": "2026-02-28"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q32",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "Which region had the highest average online order value over the financial year?",
+   "kind": "label",
+   "expected": "Melbourne",
+   "answer": "WLG",
+   "correct": false,
+   "error": "",
+   "latency_s": 1.705,
+   "llm_calls": 1,
+   "cached_calls": 0,
+   "prompt_tokens": 1550,
+   "completion_tokens": 151,
+   "cost_usd": 0.000215,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "WITH online_orders AS (\n    SELECT\n        o.region_code,\n        o.order_id,\n        o.items_subtotal - o.discount_total AS order_revenue\n    FROM staging.stg_ecom__orders o\n    WHERE o.order_date >= '2025-04-01'\n      AND o.order_date <= '2026-03-31'\n      AND o.order_status <> 'CANCELLED'\n)\nSELECT region_code AS answer\nFROM online_orders\nGROUP BY region_code\nORDER BY AVG(order_revenue) DESC\nLIMIT 1"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q32",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "Which region had the highest average online order value over the financial year?",
+   "kind": "label",
+   "expected": "Melbourne",
+   "answer": "Melbourne",
+   "correct": true,
+   "error": "",
+   "latency_s": 2.477,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3230,
+   "completion_tokens": 116,
+   "cost_usd": 0.000369,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "filters": [
+       {
+        "value": "online",
+        "dimension": "sales_channel",
+        "op": "="
+       }
+      ],
+      "group_by": [
+       "region"
+      ],
+      "start_date": "2025-04-01",
+      "metrics": [
+       "average_order_value"
+      ],
+      "end_date": "2026-03-31"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q33",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "What return on ad spend did affiliate marketing deliver in December 2025?",
+   "kind": "number",
+   "expected": 5.478575,
+   "answer": 5.478575,
+   "correct": true,
+   "error": "",
+   "latency_s": 2.385,
+   "llm_calls": 1,
+   "cached_calls": 0,
+   "prompt_tokens": 1553,
+   "completion_tokens": 480,
+   "cost_usd": 0.000347,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "WITH spend_nzd AS (\n    SELECT\n        SUM(\n            CASE \n                WHEN s.currency = 'AUD' THEN s.spend_local * COALESCE(f.aud_nzd_rate, 1.0)\n                ELSE s.spend_local\n            END\n        ) AS total_ad_spend\n    FROM staging.stg_marketing__ad_spend AS s\n    LEFT JOIN staging.stg_erp__fx_rates AS f ON s.spend_date = f.rate_date\n    WHERE s.spend_date >= '2025-12-01' \n      AND s.spend_date <= '2025-12-31'\n      AND LOWER(s.marketing_channel) = 'affiliate'\n),\nattributed_rev AS (\n    SELECT\n        SUM(\n            CASE \n                WHEN o.currency = 'AUD' THEN (o.order_total - COALESCE(o.shipping_fee, 0)) * COALESCE(f.aud_nzd_rate, 1.0)\n                ELSE (o.order_total - COALESCE(o.shipping_fee, 0))\n            END\n        ) AS total_attributed_revenue\n    FROM staging.stg_ecom__orders AS o\n    LEFT JOIN staging.stg_erp__fx_rates AS f ON o.order_date = f.rate_date\n    WHERE o.order_date >= '2025-12-01'\n      AND o.order_date <= '2025-12-31'\n      AND o.order_status <> 'cancelled'\n      AND LOWER(o.marketing_channel) = 'affiliate'\n)\nSELECT \n    CASE \n        WHEN COALESCE(s.total_ad_spend, 0) = 0 THEN 0.0\n        ELSE COALESCE(r.total_attributed_revenue, 0.0) / s.total_ad_spend\n    END AS answer\nFROM spend_nzd AS s\nCROSS JOIN attributed_rev AS r"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q33",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "What return on ad spend did affiliate marketing deliver in December 2025?",
+   "kind": "number",
+   "expected": 5.478575,
+   "answer": 5.478575,
+   "correct": true,
+   "error": "",
+   "latency_s": 2.659,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3104,
+   "completion_tokens": 152,
+   "cost_usd": 0.000371,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "start_date": "2025-12-01",
+      "end_date": "2025-12-31",
+      "metrics": [
+       "roas"
+      ],
+      "filters": [
+       {
+        "op": "=",
+        "dimension": "marketing_channel",
+        "value": "affiliate"
+       }
+      ],
+      "group_by": [
+       "marketing_channel"
+      ]
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q34",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "What was the gross margin on Food Storage products in January 2026?",
+   "kind": "number",
+   "expected": 0.566044,
+   "answer": 0.566044,
+   "correct": true,
+   "error": "",
+   "latency_s": 3.94,
+   "llm_calls": 1,
+   "cached_calls": 0,
+   "prompt_tokens": 1553,
+   "completion_tokens": 1100,
+   "cost_usd": 0.000595,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "WITH fx AS (\n    SELECT rate_date, aud_nzd_rate\n    FROM staging.stg_erp__fx_rates\n),\nmats AS (\n    SELECT sku, standard_cant_cost_nzd AS standard_cost_nzd -- wait, standard_cost_nzd\n    FROM staging.stg_erp__materials\n),\n-- Let's inspect materials columns: material_id varchar, sku varchar, description varchar, material_group varchar, product_category varchar, standard_cost_nzd decimal(12,2)\nitems AS (\n    SELECT sku, product_category, standard_cost_nzd\n    FROM staging.stg_erp__materials\n    WHERE product_category = 'Food Storage'\n),\n-- We need revenue and standard cost of goods for Food Storage in Jan 2026 across POS, Ecom, and ERP\n-- POS transaction lines\npos_lines AS (\n    SELECT\n        t.sku,\n        t.quantity,\n        t.line_total,\n        s.country,\n        t.txn_date,\n        t.currency\n    FROM staging.stg_pos__transaction_lines t\n    JOIN staging.stg_erp__stores s ON t.store_id = s.store_id\n    WHERE t.txn_date >= '2026-01-01' AND t.txn_date <= '2026-01-31'\n      AND t.is_valid = true\n),\npos_conv AS (\n    SELECT\n        p.sku,\n        p.quantity AS units,\n        CASE WHEN p.currency = 'AUD' THEN p.line_total * f.aud_nzd_rate ELSE p.line_total END AS revenue\n    FROM pos_lines p\n    LEFT JOIN fx f ON p.txn_date = f.rate_date AND p.currency = 'AUD'\n    JOIN items i ON p.sku = i.sku\n),\n-- Ecom order lines (completed orders, excluding cancelled)\necom_lines AS (\n    SELECT\n        l.sku,\n        l.quantity,\n        l.line_total,\n        o.order_date,\n        o.currency\n    FROM staging.stg_ecom__order_lines l\n    JOIN staging.stg_ecom__orders o ON l.order_id = o.order_id\n    WHERE o.order_date >= '2026-01-01' AND o.order_date <= '2026-01-31'\n      AND o.order_status <> 'cancelled'\n),\necom_conv AS (\n    SELECT\n        e.sku,\n        e.quantity AS units,\n        CASE WHEN e.currency = 'AUD' THEN e.line_total * f.aud_nzd_rate ELSE e.line_total END AS revenue\n    FROM ecom_lines e\n    LEFT JOIN fx f ON e.order_date = f.rate_date AND e.currency = 'AUD'\n    JOIN items i ON e.sku = i.sku\n),\n-- ERP Sales Orders (wholesale)\nerp_lines AS (\n    SELECT\n        m.sku,\n        l.quantity,\n        l.net_value AS line_total,\n        l.order_date,\n        l.currency\n    FROM staging.stg_erp__sales_order_lines l\n    JOIN staging.stg_erp__materials m ON l.material_id = m.material_id\n    WHERE l.order_date >= '2026-01-01' AND l.order_date <= '2026-01-31'\n),\nerp_conv AS (\n    SELECT\n        e.sku,\n        e.quantity AS units,\n        CASE WHEN e.currency = 'AUD' THEN e.line_total * f.aud_nzd_rate ELSE e.line_total END AS revenue\n    FROM erp_lines e\n    LEFT JOIN fx f ON e.order_date = f.rate_date AND e.currency = 'AUD'\n    JOIN items i ON e.sku = i.sku\n),\nall_sales AS (\n    SELECT sku, units, revenue FROM pos_conv\n    UNION ALL\n    SELECT sku, units, revenue FROM ecom_conv\n    UNION ALL\n    SELECT sku, units, revenue FROM erp_conv\n),\nagg AS (\n    SELECT\n        SUM(a.revenue) AS rev,\n        SUM(a.units * m.standard_cost_nzd) AS total_cost\n    FROM all_sales a\n    JOIN items m ON a.sku = m.sku\n    WHERE m.standard_cost_nzd IS NOT NULL\n)\nSELECT \n    CAST((rev - total_cost) / rev AS DOUBLE) AS answer\nFROM agg"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q34",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "What was the gross margin on Food Storage products in January 2026?",
+   "kind": "number",
+   "expected": 0.566044,
+   "answer": 0.566044,
+   "correct": true,
+   "error": "",
+   "latency_s": 3.024,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3087,
+   "completion_tokens": 134,
+   "cost_usd": 0.000362,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "end_date": "2026-01-31",
+      "filters": [
+       {
+        "dimension": "product_category",
+        "op": "=",
+        "value": "Food Storage"
+       }
+      ],
+      "start_date": "2026-01-01",
+      "grain": "month",
+      "metrics": [
+       "gross_margin"
+      ]
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q35",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "What was the on-time delivery rate in Australia for deliveries promised between October 2025 and February 2026?",
+   "kind": "number",
+   "expected": 0.879779,
+   "answer": null,
+   "correct": false,
+   "error": "query returned NULL",
+   "latency_s": 3.22,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3263,
+   "completion_tokens": 226,
+   "cost_usd": 0.000417,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT \n    ROUND(\n        SUM(CASE WHEN is_on_time THEN 1 ELSE 0 END)::numeric \n        / NULLIF(COUNT(*), 0), \n        4\n    ) AS answer\nFROM staging.stg_logistics__shipments\nWHERE region_code = 'AU'\n  AND promised_date >= '2025-10-01'\n  AND promised_date <= '2026-02-28'"
+     },
+     "error": false
+    },
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT \n    ROUND(\n        SUM(CASE WHEN is_on_time THEN 1 ELSE 0 END)::numeric \n        / NULLIF(COUNT(*), 0), \n        4\n    ) AS answer\nFROM staging.stg_logistics__shipments\nWHERE region_code LIKE 'AU%'\n  AND promised_date >= '2025-10-01'\n  AND promised_date <= '2026-02-28'"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q35",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "What was the on-time delivery rate in Australia for deliveries promised between October 2025 and February 2026?",
+   "kind": "number",
+   "expected": 0.879779,
+   "answer": 0.879779,
+   "correct": true,
+   "error": "",
+   "latency_s": 2.594,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3113,
+   "completion_tokens": 140,
+   "cost_usd": 0.000367,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "end_date": "2026-02-28",
+      "start_date": "2025-10-01",
+      "filters": [
+       {
+        "value": "AU",
+        "op": "=",
+        "dimension": "country"
+       }
+      ],
+      "metrics": [
+       "on_time_delivery_rate"
+      ]
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q36",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "How many units did wholesale customers buy in October 2025?",
+   "kind": "number",
+   "expected": 23046.0,
+   "answer": 23046.0,
+   "correct": true,
+   "error": "",
+   "latency_s": 1.477,
+   "llm_calls": 1,
+   "cached_calls": 0,
+   "prompt_tokens": 1551,
+   "completion_tokens": 74,
+   "cost_usd": 0.000185,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT \n    CAST(SUM(quantity) AS DOUBLE) AS answer\nFROM staging.stg_erp__sales_order_lines\nWHERE order_date >= DATE '2025-10-01' \n  AND order_date <= DATE '2025-10-31'"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q36",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "How many units did wholesale customers buy in October 2025?",
+   "kind": "number",
+   "expected": 23046.0,
+   "answer": 23046,
+   "correct": true,
+   "error": "",
+   "latency_s": 2.811,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3089,
+   "completion_tokens": 124,
+   "cost_usd": 0.000359,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "metrics": [
+       "units_sold"
+      ],
+      "start_date": "2025-10-01",
+      "end_date": "2025-10-31",
+      "group_by": [
+       "sales_channel"
+      ],
+      "filters": [
+       {
+        "op": "=",
+        "value": "wholesale",
+        "dimension": "sales_channel"
+       }
+      ]
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q37",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "Which paid marketing channel did we spend the most on over the financial year?",
+   "kind": "label",
+   "expected": "paid_social",
+   "answer": "paid_social",
+   "correct": true,
+   "error": "",
+   "latency_s": 3.565,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3374,
+   "completion_tokens": 413,
+   "cost_usd": 0.000503,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT ad_spend.marketing_channel AS answer\nFROM staging.stg_marketing__ad_spend AS ad_spend\nJOIN reference.marketing_channels AS mc\n  ON ad_spend.marketing_channel = mc.marketing_channel\nWHERE ad_spend.spend_date >= '2025-04-01'\n  AND ad_spend.spend_date <= '2026-03-31'\n  AND mc.is_paid = TRUE\nGROUP BY ad_spend.marketing_channel\nORDER BY SUM(\n  CASE \n    WHEN ad_spend.currency = 'AUD' THEN ad_spend.spend_local * COALESCE(fx.aud_nzd_rate, 1.0)\n    ELSE ad_spend.spend_local \n  END\n) DESC\nLIMIT 1"
+     },
+     "error": true
+    },
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT ad_spend.marketing_channel AS answer\nFROM staging.stg_marketing__ad_spend AS ad_spend\nJOIN reference.marketing_channels AS mc\n  ON ad_spend.marketing_channel = mc.marketing_channel\nLEFT JOIN staging.stg_erp__fx_rates AS fx\n  ON ad_spend.spend_date = fx.rate_date\nWHERE ad_spend.spend_date >= '2025-04-01'\n  AND ad_spend.spend_date <= '2026-03-31'\n  AND mc.is_paid = TRUE\nGROUP BY ad_spend.marketing_channel\nORDER BY SUM(\n  CASE \n    WHEN ad_spend.currency = 'AUD' THEN ad_spend.spend_local * COALESCE(fx.aud_nzd_rate, 1.0)\n    ELSE ad_spend.spend_local \n  END\n) DESC\nLIMIT 1"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q37",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "Which paid marketing channel did we spend the most on over the financial year?",
+   "kind": "label",
+   "expected": "paid_social",
+   "answer": "paid_social",
+   "correct": true,
+   "error": "",
+   "latency_s": 2.534,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3223,
+   "completion_tokens": 120,
+   "cost_usd": 0.00037,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "group_by": [
+       "marketing_channel"
+      ],
+      "metrics": [
+       "ad_spend"
+      ],
+      "order_by": [
+       {
+        "descending": true,
+        "field": "ad_spend"
+       }
+      ],
+      "start_date": "2025-04-01",
+      "end_date": "2026-03-31"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q38",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "How much revenue did the Melbourne store make in February 2026, in NZD?",
+   "kind": "number",
+   "expected": 46260.673258,
+   "answer": "46260.673258",
+   "correct": true,
+   "error": "",
+   "latency_s": 3.598,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3329,
+   "completion_tokens": 380,
+   "cost_usd": 0.000485,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT \n    sum(\n        CASE \n            WHEN t.currency = 'AUD' THEN t.line_total * fx.aud_nzd_rate\n            ELSE t.line_total\n        END\n    ) AS answer\nFROM staging.stg_pos__transaction_lines t\nJOIN staging.stg_erp__stores s ON t.store_id = s.store_id\nLEFT JOIN staging.stg_erp__fx_rates fx ON t.txn_date = fx.rate_date\nWHERE s.store_name = 'Melbourne'\n  AND t.txn_date >= DATE '2026-02-01'\n  AND t.txn_date <= DATE '2026-02-28'\n  AND t.is_valid = true\n  AND t.txn_type = 'SALE'"
+     },
+     "error": false
+    },
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT \n    sum(\n        CASE \n            WHEN t.currency = 'AUD' THEN t.line_total * fx.aud_nzd_rate\n            ELSE t.line_total\n        END\n    ) AS answer\nFROM staging.stg_pos__transaction_lines t\nJOIN staging.stg_erp__stores s ON t.store_id = s.store_id\nLEFT JOIN staging.stg_erp__fx_rates fx ON t.txn_date = fx.rate_date\nWHERE s.store_name ILIKE '%Melbourne%'\n  AND t.txn_date >= DATE '2026-02-01'\n  AND t.txn_date <= DATE '2026-02-28'\n  AND t.is_valid = true"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q38",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "How much revenue did the Melbourne store make in February 2026, in NZD?",
+   "kind": "number",
+   "expected": 46260.673258,
+   "answer": 46260.673258,
+   "correct": true,
+   "error": "",
+   "latency_s": 2.804,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3095,
+   "completion_tokens": 142,
+   "cost_usd": 0.000366,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "filters": [
+       {
+        "op": "=",
+        "value": "Melbourne",
+        "dimension": "region"
+       },
+       {
+        "dimension": "sales_channel",
+        "op": "=",
+        "value": "store"
+       }
+      ],
+      "start_date": "2026-02-01",
+      "metrics": [
+       "revenue"
+      ],
+      "end_date": "2026-02-28"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q39",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "What was the average order value across all channels in December 2025?",
+   "kind": "number",
+   "expected": 110.931528,
+   "answer": 111.651718,
+   "correct": false,
+   "error": "",
+   "latency_s": 2.847,
+   "llm_calls": 1,
+   "cached_calls": 0,
+   "prompt_tokens": 1553,
+   "completion_tokens": 663,
+   "cost_usd": 0.00042,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "WITH ecom_orders AS (\n    SELECT \n        o.order_id,\n        CASE \n            WHEN o.currency = 'AUD' THEN o.items_subtotal * fx.aud_nzd_rate\n            ELSE o.items_subtotal\n        END AS order_revenue\n    FROM staging.stg_ecom__orders o\n    LEFT JOIN staging.stg_erp__fx_rates fx ON o.order_date = fx.rate_date\n    WHERE o.order_date >= '2025-12-01' \n      AND o.order_date <= '2025-12-31'\n      AND o.order_status <> 'CANCELLED'\n),\npos_orders AS (\n    SELECT \n        t.transaction_id AS order_id,\n        CASE \n            WHEN s.currency = 'AUD' THEN SUM(t.line_total) * fx.aud_nzd_rate\n            ELSE SUM(t.line_total)\n        END AS order_revenue\n    FROM staging.stg_pos__transaction_lines t\n    JOIN staging.stg_erp__stores s ON t.store_id = s.store_id\n    LEFT JOIN staging.stg_erp__fx_rates fx ON t.txn_date = fx.rate_date\n    WHERE t.txn_date >= '2025-12-01' \n      AND t.txn_date <= '2025-12-31'\n      AND t.txn_type = 'SALE'\n      AND t.is_valid = TRUE\n    GROUP BY t.transaction_id, s.currency, fx.aud_nzd_rate\n),\nerp_orders AS (\n    SELECT \n        l.sales_order_id AS order_id,\n        CASE \n            WHEN l.currency = 'AUD' THEN SUM(l.net_value) * fx.aud_nzd_rate\n            ELSE SUM(l.net_value)\n        END AS order_revenue\n    FROM staging.stg_erp__sales_order_lines l\n    LEFT JOIN staging.stg_erp__fx_rates fx ON l.order_date = fx.rate_date\n    WHERE l.order_date >= '2025-12-01' \n      AND l.order_date <= '2025-12-31'\n    GROUP BY l.sales_order_id, l.currency, fx.aud_nzd_rate\n),\nall_orders AS (\n    SELECT order_id, order_revenue FROM ecom_orders\n    UNION ALL\n    SELECT order_id, order_revenue FROM pos_orders\n    UNION ALL\n    SELECT order_id, order_revenue FROM erp_orders\n)\nSELECT SUM(order_revenue) / COUNT(order_id) AS answer\nFROM all_orders"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q39",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "What was the average order value across all channels in December 2025?",
+   "kind": "number",
+   "expected": 110.931528,
+   "answer": 110.931528,
+   "correct": true,
+   "error": "",
+   "latency_s": 2.519,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3056,
+   "completion_tokens": 115,
+   "cost_usd": 0.000352,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "start_date": "2025-12-01",
+      "end_date": "2025-12-31",
+      "metrics": [
+       "average_order_value"
+      ]
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q40",
+   "split": "holdout",
+   "system": "baseline",
+   "question": "How much online revenue came from Australian customers between October and December 2025?",
+   "kind": "number",
+   "expected": 103019.590994,
+   "answer": null,
+   "correct": false,
+   "error": "query returned NULL",
+   "latency_s": 3.4,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3348,
+   "completion_tokens": 370,
+   "cost_usd": 0.000483,
+   "tool_calls": [
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT \n    sum(\n        CASE \n            WHEN o.currency = 'AUD' THEN o.items_subtotal - o.discount_total\n            ELSE (o.items_subtotal - o.discount_total) * coalesce(f.aud_nzd_rate, 1)\n        not null\n        END\n    ) AS answer\nFROM staging.stg_ecom__orders o\nLEFT JOIN staging.stg_erp__fx_rates f ON o.order_date = f.rate_date\nWHERE o.order_date >= '2025-10-01' \n  AND o.order_date <= '2025-12-31'\n  AND o.order_status != 'CANCELLED'\n  AND o.region_code LIKE 'AU%'"
+     },
+     "error": true
+    },
+    {
+     "tool": "sql",
+     "arguments": {
+      "sql": "SELECT \n    sum(\n        CASE \n            WHEN o.currency = 'AUD' THEN o.items_subtotal - o.discount_total\n            ELSE (o.items_subtotal - o.discount_total) * coalesce(f.aud_nzd_rate, 1)\n        END\n    ) AS answer\nFROM staging.stg_ecom__orders o\nLEFT JOIN staging.stg_erp__fx_rates f ON o.order_date = f.rate_date\nWHERE o.order_date >= '2025-10-01' \n  AND o.order_date <= '2025-12-31'\n  AND o.order_status != 'CANCELLED'\n  AND o.region_code LIKE 'AU%'"
+     },
+     "error": false
+    }
+   ]
+  },
+  {
+   "id": "q40",
+   "split": "holdout",
+   "system": "semantic_agent",
+   "question": "How much online revenue came from Australian customers between October and December 2025?",
+   "kind": "number",
+   "expected": 103019.590994,
+   "answer": 103019.590994,
+   "correct": true,
+   "error": "",
+   "latency_s": 2.625,
+   "llm_calls": 2,
+   "cached_calls": 0,
+   "prompt_tokens": 3092,
+   "completion_tokens": 151,
+   "cost_usd": 0.00037,
+   "tool_calls": [
+    {
+     "tool": "query_metric",
+     "arguments": {
+      "start_date": "2025-10-01",
+      "metrics": [
+       "revenue"
+      ],
+      "filters": [
+       {
+        "op": "=",
+        "value": "online",
+        "dimension": "sales_channel"
+       },
+       {
+        "dimension": "country",
+        "value": "AU",
+        "op": "="
+       }
+      ],
+      "end_date": "2025-12-31"
+     },
+     "error": false
+    }
+   ]
+  }
+ ]
+}

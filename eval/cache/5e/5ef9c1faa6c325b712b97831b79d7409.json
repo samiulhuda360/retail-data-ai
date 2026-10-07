@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_104247",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"end_date\":\"2025-06-30\",\"group_by\":[\"region\"],\"start_date\":\"2025-06-01\",\"grain\":\"month\",\"metrics\":[\"revenue\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TL9qmpYzNBokb22iq827zPnLtXjN+/m7Oa3emGnlpFTw99f8K6Ld/AYEXzsVQleSkzlz6c7Y+8KAT/RcFgFbBpNwfn6bdkaPzDvT952b4lEOK3DhFvR21H6w="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1451,
+ "completion_tokens": 64,
+ "latency_s": 1.211
+}

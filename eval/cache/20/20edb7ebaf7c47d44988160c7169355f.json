@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 2.5665851278169756, \"explanation\": \"The ROAS of paid social in Australia for FY2026 was 2.5665851278169756.\"}\n```"
+ },
+ "prompt_tokens": 1647,
+ "completion_tokens": 68,
+ "latency_s": 1.302
+}

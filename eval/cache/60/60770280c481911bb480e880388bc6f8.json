@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 5.478575342075014, \"explanation\": \"The return on ad spend for affiliate marketing in December 2025 was 5.478575342075014.\"}\n```"
+ },
+ "prompt_tokens": 1650,
+ "completion_tokens": 67,
+ "latency_s": 1.391
+}

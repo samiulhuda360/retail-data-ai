@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nWITH fx AS (\n    SELECT rate_date, aud_nzd_rate\n    FROM staging.stg_erp__fx_rates\n),\nwholesale_lines AS (\n    SELECT \n        l.order_date,\n        l.net_value * CASE WHEN l.currency = 'AUD' THEN COALESCE(f.aud_nzd_rate, 1.0) ELSE 1.0 END AS net_revenue_nzd,\n        l.quantity * COALESCE(m.standard_cost_nzd, 0) AS total_standard_cost_nzd,\n        CASE WHEN m.standard_cost_nzd IS NOT NULL THEN 1 ELSE 0 END AS has_cost,\n        l.net_value * CASE WHEN l.currency = 'AUD' THEN COALESCE(f.aud_nzd_rate, 1.0) ELSE 1.0 END AS costed_revenue_nzd\n    FROM staging.stg_erp__sales_order_lines l\n    LEFT JOIN staging.stg_erp__materials m ON l.material_id = m.material_id\n    LEFT JOIN fx f ON l.order_date = f.rate_date\n    WHERE l.order_date >= DATE '2025-07-01'\n      AND l.order_date <= DATE '2025-09-30'\n)\nSELECT \n    CAST(SUM(CASE WHEN has_cost = 1 THEN net_revenue_nzd - total_standard_cost_nzd ELSE 0 END) / NULLIF(SUM(CASE WHEN has_cost = 1 THEN costed_revenue_nzd ELSE 0 END), 0) AS DOUBLE) AS answer\nFROM wholesale_lines\n```"
+ },
+ "prompt_tokens": 1554,
+ "completion_tokens": 397,
+ "latency_s": 1.826
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 4.180438758249131, \"explanation\": \"The return on ad spend for paid search from October to December 2025 was 4.180.\"}\n```"
+ },
+ "prompt_tokens": 1627,
+ "completion_tokens": 57,
+ "latency_s": 1.351
+}

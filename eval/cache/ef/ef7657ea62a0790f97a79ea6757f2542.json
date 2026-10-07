@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    SUM(CASE WHEN m.standard_cost_nzd IS NOT NULL THEN (ol.line_total - COALESCE(ol.discount_amount, 0)) - (ol.quantity * m.standard_cost_nzd) ELSE 0 END) /\n    NULLIF(SUM(CASE WHEN m.standard_cost_nzd IS NOT NULL THEN (ol.line_total - COALESCE(ol.discount_amount, 0)) ELSE 0 END), 0) AS answer\nFROM staging.stg_ecom__order_lines ol\nJOIN staging.stg_ecom__orders o ON ol.order_id = o.order_id\nLEFT JOIN staging.stg_erp__materials m ON ol.sku = m.sku\nWHERE o.order_status <> 'CANCELLED'\n  AND o.order_date >= DATE '2026-01-01'\n  AND o.order_date <= DATE '2026-03-31'\n  AND m.product_category = 'Kitchen Tools';\n```"
+ },
+ "prompt_tokens": 1556,
+ "completion_tokens": 244,
+ "latency_s": 1.867
+}

@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_375151",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"start_date\":\"2025-11-24\",\"metrics\":[\"revenue\"],\"end_date\":\"2025-11-30\",\"filters\":[{\"op\":\"=\",\"dimension\":\"region\",\"value\":\"Christchurch\"}],\"grain\":\"day\"}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0Tqz7ZKZuLkFVUUO5c1LVoe+TVJeuzIpClm+5SOMtId/gfzVlHodyABkBUf+TboO4QK+HbR6JFGCVeK+64uAFbu5LcRwRK8PU9jB0+dVXNeLm9JBYyJERSVcc="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1462,
+ "completion_tokens": 78,
+ "latency_s": 1.417
+}

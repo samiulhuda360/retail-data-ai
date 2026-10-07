@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 116326.883455, \"explanation\": \"Sydney stores revenue in October 2025 was 116326.883455 NZD.\"}"
+ },
+ "prompt_tokens": 1635,
+ "completion_tokens": 51,
+ "latency_s": 1.42
+}

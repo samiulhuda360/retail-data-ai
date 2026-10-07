@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 0.4724038964618977, \"explanation\": \"The gross margin on Bakeware for FY2026 was 0.4724038964618977.\"}\n```"
+ },
+ "prompt_tokens": 1633,
+ "completion_tokens": 66,
+ "latency_s": 2.055
+}

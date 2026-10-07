@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 82.40417926215278, \"explanation\": \"The average transaction value at the Melbourne store in February 2026 was 82.40.\"}\n```"
+ },
+ "prompt_tokens": 1676,
+ "completion_tokens": 55,
+ "latency_s": 1.406
+}

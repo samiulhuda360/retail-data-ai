@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT count(DISTINCT o.order_id) AS answer\nFROM staging.stg_ecom__orders o\nJOIN reference.regions r ON o.region_code = r.region_code\nWHERE o.order_status <> 'CANCELLED'\n  AND r.region_name ILIKE '%Sydney%'\n  AND o.order_date >= DATE '2026-03-01'\n  AND o.order_date <= DATE '2026-03-31'\n```"
+ },
+ "prompt_tokens": 1553,
+ "completion_tokens": 118,
+ "latency_s": 1.494
+}

@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_71068",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"filters\":[{\"value\":\"Tableware\",\"op\":\"=\",\"dimension\":\"product_category\"}],\"start_date\":\"2025-12-01\",\"group_by\":[\"product_category\"],\"end_date\":\"2025-12-31\",\"metrics\":[\"units_sold\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0T4mySTX9bwTqIeVJtv1Q64EQ9NB8gtbNjgbc9kwcylfzAADNN2PKGewLlMjnDL5E9BZfedrj8Ob/Mx/3ZF5UoAKYtJT0scBMQiu0EG7VMBGxy3upRg0A42KY="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1457,
+ "completion_tokens": 86,
+ "latency_s": 1.312
+}

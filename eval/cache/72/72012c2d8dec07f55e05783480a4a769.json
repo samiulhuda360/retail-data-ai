@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 77.04764907064018, \"explanation\": \"The average order value for online orders in November 2025 was 77.04764907064018.\"}\n```"
+ },
+ "prompt_tokens": 1638,
+ "completion_tokens": 66,
+ "latency_s": 1.396
+}

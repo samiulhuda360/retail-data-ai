@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 466489.2, \"explanation\": \"Total revenue from New Zealand in May 2025 was 466489.20 NZD.\"}\n```"
+ },
+ "prompt_tokens": 1601,
+ "completion_tokens": 49,
+ "latency_s": 1.337
+}

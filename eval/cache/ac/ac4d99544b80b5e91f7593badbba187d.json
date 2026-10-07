@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 0.8677394034536892, \"explanation\": \"Coastal Couriers' on-time delivery rate from April 2025 to February 2026 was approximately 86.77%.\"}"
+ },
+ "prompt_tokens": 1650,
+ "completion_tokens": 61,
+ "latency_s": 1.286
+}

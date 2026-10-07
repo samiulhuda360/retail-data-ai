@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 0.4628076405510648, \"explanation\": \"The company-wide gross margin in November 2025 was 0.4628076405510648.\"}"
+ },
+ "prompt_tokens": 1600,
+ "completion_tokens": 62,
+ "latency_s": 1.282
+}

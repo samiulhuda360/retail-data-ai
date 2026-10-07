@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 0.8355621594848935, \"explanation\": \"The on-time delivery rate for December 2025 was 0.8355621594848935.\"}"
+ },
+ "prompt_tokens": 1610,
+ "completion_tokens": 62,
+ "latency_s": 1.394
+}

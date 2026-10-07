@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_326086",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"grain\":\"month\",\"start_date\":\"2025-12-01\",\"filters\":[{\"op\":\"=\",\"value\":\"online\",\"dimension\":\"sales_channel\"}],\"end_date\":\"2025-12-31\",\"metrics\":[\"revenue\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TnTaMDc9jAZbQRdGGHUyLhJgjpi2nD6aw7Dx4ekg35T620d9h4SIx58utvzU+FRTnTOdaiD1MZvRYvfKdGIUsX5JOeI/WNdAS5sc20V1HDnP3uwzAOUk+bFM="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1453,
+ "completion_tokens": 79,
+ "latency_s": 2.794
+}

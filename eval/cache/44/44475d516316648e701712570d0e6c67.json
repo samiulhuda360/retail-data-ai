@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 46260.673258, \"explanation\": \"The Melbourne store generated 46260.673258 NZD in revenue in February 2026.\"}"
+ },
+ "prompt_tokens": 1638,
+ "completion_tokens": 51,
+ "latency_s": 1.382
+}

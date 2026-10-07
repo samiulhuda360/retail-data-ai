@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    ROUND(\n        SUM(CASE WHEN is_on_time THEN 1 ELSE 0 END)::numeric \n        / NULLIF(COUNT(*), 0), \n        4\n    ) AS answer\nFROM staging.stg_logistics__shipments\nWHERE region_code = 'AU'\n  AND promised_date >= '2025-10-01'\n  AND promised_date <= '2026-02-28';\n```"
+ },
+ "prompt_tokens": 1564,
+ "completion_tokens": 113,
+ "latency_s": 1.45
+}

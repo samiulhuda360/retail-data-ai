@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": \"email\", \"explanation\": \"Email had the highest return on ad spend at 8.78 in September 2025.\"}\n```"
+ },
+ "prompt_tokens": 1792,
+ "completion_tokens": 38,
+ "latency_s": 1.361
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```json\n{\"answer\": 11148, \"explanation\": \"Tableware units sold net of returns in December 2025 was 11148.\"}\n```"
+ },
+ "prompt_tokens": 1645,
+ "completion_tokens": 42,
+ "latency_s": 1.27
+}

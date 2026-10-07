@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_113126",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"group_by\":[\"marketing_channel\"],\"metrics\":[\"ad_spend\"],\"order_by\":[{\"descending\":true,\"field\":\"ad_spend\"}],\"start_date\":\"2025-04-01\",\"end_date\":\"2026-03-31\"}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0TWsQEE7fGegK9KG1PuumljxVLkPxwBk3BfW1CXsdgxHHB2vUETCDA1Azi0D+vVGu9jBFvZkSGAMagIwYR2lbYt0LJzmGvfClpMiAkjG82mZkmKdH9b0iX+h8="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1452,
+ "completion_tokens": 80,
+ "latency_s": 1.228
+}

@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "{\"answer\": 148, \"explanation\": \"There were 148 online orders from the Sydney region in March 2026.\"}"
+ },
+ "prompt_tokens": 1674,
+ "completion_tokens": 33,
+ "latency_s": 1.201
+}

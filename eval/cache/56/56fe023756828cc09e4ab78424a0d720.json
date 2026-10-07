@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    COUNT(DISTINCT t.transaction_id) AS answer\nFROM staging.stg_pos__transaction_lines t\nJOIN staging.stg_erp__stores s ON t.store_id = s.store_id\nWHERE s.store_name ILIKE '%Wellington%'\n  AND t.txn_date >= '2025-08-01'\n  AND t.txn_date <= '2025-08-31'\n  AND t.txn_type = 'SALE'\n  AND t.is_valid = TRUE;\n```"
+ },
+ "prompt_tokens": 1553,
+ "completion_tokens": 136,
+ "latency_s": 1.481
+}

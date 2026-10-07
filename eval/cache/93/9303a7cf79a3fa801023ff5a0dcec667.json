@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT \n    CAST(SUM(units) AS DOUBLE) AS answer\nFROM (\n    -- POS transaction lines (Tableware, December 2025)\n    SELECT \n        t.quantity AS units\n    FROM staging.stg_pos__transaction_lines t\n    JOIN staging.stg_erp__materials m ON t.sku = m.sku\n    WHERE t.txn_date >= '2025-12-01' \n      AND t.txn_date <= '2025-12-31'\n      AND m.product_category = 'Tableware'\n      AND t.is_valid = true\n\n    UNION ALL\n\n    -- Ecom order lines (Tableware, December 2025)\n    SELECT \n        ol.quantity AS units\n    FROM staging.stg_ecom__order_lines ol\n    JOIN staging.stg_ecom__orders o ON ol.order_id = o.order_id\n    JOIN staging.stg_erp__materials m ON ol.sku = m.sku\n    WHERE o.order_date >= '2025-12-01' \n      AND o.order_date <= '2025-12-31'\n      AND m.product_category = 'Tableware'\n      AND o.order_status != 'cancelled'\n\n    UNION ALL\n\n    -- ERP Sales Order lines (Tableware, December 2025)\n    SELECT \n        sol.quantity AS units\n    FROM staging.stg_erp__sales_order_lines sol\n    JOIN staging.stg_erp__materials m ON sol.material_id = m.material_id\n    WHERE sol.order_date >= '2025-12-01' \n      AND sol.order_date <= '2025-12-31'\n      AND m.product_category = 'Tableware'\n) all_lines;\n```"
+ },
+ "prompt_tokens": 1556,
+ "completion_tokens": 447,
+ "latency_s": 2.302
+}

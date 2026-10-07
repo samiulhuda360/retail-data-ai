@@ -1,0 +1,9 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": "```sql\nSELECT carrier AS answer\nFROM staging.stg_logistics__shipments\nWHERE promised_date >= '2025-04-01'\n  AND promised_date <= '2026-02-28'\nGROUP BY carrier\nHAVING COUNT(*) > 0\nORDER BY \n    CAST(SUM(CASE WHEN is_on_time THEN 1 ELSE 0 END) AS DOUBLE) / COUNT(*) ASC,\n    carrier ASC\nLIMIT 1;\n```"
+ },
+ "prompt_tokens": 1561,
+ "completion_tokens": 112,
+ "latency_s": 1.9
+}

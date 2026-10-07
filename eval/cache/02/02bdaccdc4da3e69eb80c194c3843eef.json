@@ -1,0 +1,24 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "message": {
+  "content": null,
+  "tool_calls": [
+   {
+    "id": "call_484420",
+    "type": "function",
+    "function": {
+     "name": "query_metric",
+     "arguments": "{\"metrics\":[\"orders\"],\"start_date\":\"2025-08-01\",\"grain\":\"month\",\"end_date\":\"2025-08-31\",\"filters\":[{\"op\":\"=\",\"dimension\":\"region\",\"value\":\"Wellington\"},{\"dimension\":\"sales_channel\",\"value\":\"store\",\"op\":\"=\"}],\"group_by\":[\"date\"]}"
+    },
+    "extra_content": {
+     "google": {
+      "thought_signature": "EmAKXgFpFH0T226ZKDI/D0blrleqq9Wlv+0eKrTsCWZpFwirGI2iMxz2mRNsmnPM9CLokk+HCGrTCaMIWepQgDYpcCPVdAF0f/znmliyOUUAoMzWMWsp9CKsovE+A1qKk5U="
+     }
+    }
+   }
+  ]
+ },
+ "prompt_tokens": 1454,
+ "completion_tokens": 106,
+ "latency_s": 1.21
+}
