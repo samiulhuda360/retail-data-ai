@@ -84,6 +84,48 @@ def cmd_pipeline(a: argparse.Namespace) -> int:
     return 0 if codes[2] == 0 and codes[3] == 0 else 1
 
 
+def cmd_ask(a: argparse.Namespace) -> int:
+    import asyncio
+
+    from .agent import analyst
+    from .llm import LLM, NoModel
+    from .mcp_client import metrics_session
+
+    async def go() -> int:
+        llm = LLM()
+        async with metrics_session() as tools:
+            try:
+                run = await analyst.answer(a.question, tools, llm)
+            except NoModel as e:
+                print(f"{e}. Set AI_API_KEY to ask questions; the metrics tools work without it (see mcp-server).")
+                return 2
+        for call in run.tool_calls:
+            print(f"  tool {call['tool']}({json.dumps(call['arguments'])})")
+        print(f"answer: {run.answer}")
+        print(f"why:    {run.explanation}")
+        print(
+            f"({run.llm_calls} model calls, {run.prompt_tokens + run.completion_tokens} tokens, {run.latency_s:.2f}s)"
+        )
+        return 0 if not run.error else 1
+
+    return asyncio.run(go())
+
+
+def cmd_report(a: argparse.Namespace) -> int:
+    from .agent.campaign_report import main as report_main
+
+    return report_main(a.week, use_model=not a.no_model)
+
+
+def cmd_eval(a: argparse.Namespace) -> int:
+    from .eval.run import SYSTEMS
+    from .eval.run import main as eval_main
+
+    systems = a.systems.split(",") if a.systems else list(SYSTEMS)
+    ids = a.ids.split(",") if a.ids else None
+    return eval_main(systems, a.split, offline=a.offline, oracle=a.oracle, ids=ids)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="retail", description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     sub = ap.add_subparsers(dest="command", required=True)
@@ -103,6 +145,20 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--alert", help="webhook URL (default: $DQ_WEBHOOK_URL)")
     p.set_defaults(func=cmd_pipeline)
+    q = sub.add_parser("ask", help="ask the analyst agent a question")
+    q.add_argument("question")
+    q.set_defaults(func=cmd_ask)
+    r = sub.add_parser("campaign-report", help="weekly campaign report with a grounding check")
+    r.add_argument("--week", default="2026-W13", help="ISO week, e.g. 2026-W13")
+    r.add_argument("--no-model", action="store_true", help="use the template writer even if a key is set")
+    r.set_defaults(func=cmd_report)
+    e = sub.add_parser("eval", help="evaluation: text-to-SQL baseline vs semantic agent")
+    e.add_argument("--split", choices=["dev", "holdout", "all"], default="all")
+    e.add_argument("--systems", help="comma-separated: baseline,semantic_agent")
+    e.add_argument("--ids", help="comma-separated question ids (debug runs are not saved)")
+    e.add_argument("--offline", action="store_true", help="use cached model responses only")
+    e.add_argument("--oracle", action="store_true", help="no model: check the semantic layer against references")
+    e.set_defaults(func=cmd_eval)
     a = ap.parse_args(argv)
     return int(a.func(a))
 

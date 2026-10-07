@@ -1,0 +1,175 @@
+# 40 business questions about Acme Kitchen Co.'s FY2026 (1 April 2025 to 31 March 2026).
+#
+# Each question has a machine-readable `spec`. The reference answer is computed from the generator's clean
+# truth tables by an independent pandas implementation (retail_ai/eval/reference.py), not from the warehouse.
+# The same spec also runs through the semantic layer as an "oracle" query, which checks that every question is
+# answerable and that the reference and the warehouse agree.
+#
+# split: dev questions were used while developing prompts; the 10 holdout questions were written at the same
+# time, before any prompt was run, and were not used for tuning.
+#
+# spec fields: metric, start, end (inclusive), filters {dimension: value}, and for label questions
+# argmax/argmin: <dimension> (the answer is the dimension value with the highest/lowest metric).
+
+questions:
+  - id: q01
+    split: dev
+    question: What was total revenue across all channels for the whole financial year (April 2025 to March 2026)?
+    spec: {metric: revenue, start: 2025-04-01, end: 2026-03-31}
+  - id: q02
+    split: dev
+    question: How much revenue did the online store make in December 2025?
+    spec: {metric: revenue, start: 2025-12-01, end: 2025-12-31, filters: {sales_channel: online}}
+  - id: q03
+    split: dev
+    question: What was wholesale revenue between July and September 2025?
+    spec: {metric: revenue, start: 2025-07-01, end: 2025-09-30, filters: {sales_channel: wholesale}}
+  - id: q04
+    split: dev
+    question: What did our Sydney stores take in revenue in October 2025?
+    spec: {metric: revenue, start: 2025-10-01, end: 2025-10-31, filters: {sales_channel: store, region: Sydney}}
+  - id: q05
+    split: dev
+    question: What was the gross margin on Bakeware over the whole financial year?
+    spec: {metric: gross_margin, start: 2025-04-01, end: 2026-03-31, filters: {product_category: Bakeware}}
+  - id: q06
+    split: dev
+    question: What was the company-wide gross margin in November 2025?
+    spec: {metric: gross_margin, start: 2025-11-01, end: 2025-11-30}
+  - id: q07
+    split: dev
+    question: Which product category brought in the most revenue in December 2025?
+    spec: {metric: revenue, start: 2025-12-01, end: 2025-12-31, argmax: product_category}
+  - id: q08
+    split: dev
+    question: Which region generated the least revenue in June 2025?
+    spec: {metric: revenue, start: 2025-06-01, end: 2025-06-30, argmin: region}
+  - id: q09
+    split: dev
+    question: What was the average order value for online orders in November 2025?
+    spec: {metric: average_order_value, start: 2025-11-01, end: 2025-11-30, filters: {sales_channel: online}}
+  - id: q10
+    split: dev
+    question: What is the average wholesale order value over the financial year?
+    spec: {metric: average_order_value, start: 2025-04-01, end: 2026-03-31, filters: {sales_channel: wholesale}}
+  - id: q11
+    split: dev
+    question: How many sale transactions did the Wellington store make in August 2025?
+    spec: {metric: orders, start: 2025-08-01, end: 2025-08-31, filters: {sales_channel: store, region: Wellington}}
+  - id: q12
+    split: dev
+    question: What was the return on ad spend for paid search from October to December 2025?
+    spec: {metric: roas, start: 2025-10-01, end: 2025-12-31, filters: {marketing_channel: paid_search}}
+  - id: q13
+    split: dev
+    question: What was the ROAS of paid social in Australia over the whole year?
+    spec: {metric: roas, start: 2025-04-01, end: 2026-03-31, filters: {marketing_channel: paid_social, country: AU}}
+  - id: q14
+    split: dev
+    question: How much did we spend on advertising in January 2026, in NZD?
+    spec: {metric: ad_spend, start: 2026-01-01, end: 2026-01-31}
+  - id: q15
+    split: dev
+    question: Which marketing channel had the best return on ad spend in September 2025?
+    spec: {metric: roas, start: 2025-09-01, end: 2025-09-30, argmax: marketing_channel}
+  - id: q16
+    split: dev
+    question: What share of deliveries promised in December 2025 arrived on time?
+    spec: {metric: on_time_delivery_rate, start: 2025-12-01, end: 2025-12-31}
+  - id: q17
+    split: dev
+    question: What was Coastal Couriers' on-time delivery rate from April 2025 to February 2026?
+    spec: {metric: on_time_delivery_rate, start: 2025-04-01, end: 2026-02-28, filters: {carrier: Coastal Couriers}}
+  - id: q18
+    split: dev
+    question: Which carrier had the worst on-time delivery rate between April 2025 and February 2026?
+    spec: {metric: on_time_delivery_rate, start: 2025-04-01, end: 2026-02-28, argmin: carrier}
+  - id: q19
+    split: dev
+    question: How many Tableware units did we sell in December 2025, net of returns?
+    spec: {metric: units_sold, start: 2025-12-01, end: 2025-12-31, filters: {product_category: Tableware}}
+  - id: q20
+    split: dev
+    question: What was total revenue from New Zealand in May 2025?
+    spec: {metric: revenue, start: 2025-05-01, end: 2025-05-31, filters: {country: NZ}}
+  - id: q21
+    split: dev
+    question: What gross margin did the wholesale channel make between July and September 2025?
+    spec: {metric: gross_margin, start: 2025-07-01, end: 2025-09-30, filters: {sales_channel: wholesale}}
+  - id: q22
+    split: dev
+    question: How much online revenue was attributed to email marketing in November 2025?
+    spec: {metric: attributed_revenue, start: 2025-11-01, end: 2025-11-30, filters: {marketing_channel: email}}
+  - id: q23
+    split: dev
+    question: What was the average transaction value at the Melbourne store in February 2026?
+    spec: {metric: average_order_value, start: 2026-02-01, end: 2026-02-28, filters: {sales_channel: store, region: Melbourne}}
+  - id: q24
+    split: dev
+    question: What was Christchurch's revenue in Black Friday week, 24 to 30 November 2025?
+    spec: {metric: revenue, start: 2025-11-24, end: 2025-11-30, filters: {region: Christchurch}}
+  - id: q25
+    split: dev
+    question: Which sales channel had the highest gross margin over the financial year?
+    spec: {metric: gross_margin, start: 2025-04-01, end: 2026-03-31, argmax: sales_channel}
+  - id: q26
+    split: dev
+    question: How much did we spend on display advertising in Auckland over the whole year?
+    spec: {metric: ad_spend, start: 2025-04-01, end: 2026-03-31, filters: {marketing_channel: display, region: Auckland}}
+  - id: q27
+    split: dev
+    question: What was the on-time delivery rate for wholesale shipments promised in November 2025?
+    spec: {metric: on_time_delivery_rate, start: 2025-11-01, end: 2025-11-30, filters: {sales_channel: wholesale}}
+  - id: q28
+    split: dev
+    question: What revenue did the Wellington store make in November 2025?
+    spec: {metric: revenue, start: 2025-11-01, end: 2025-11-30, filters: {sales_channel: store, region: Wellington}}
+  - id: q29
+    split: dev
+    question: What was the gross margin on Kitchen Tools sold online from January to March 2026?
+    spec: {metric: gross_margin, start: 2026-01-01, end: 2026-03-31, filters: {product_category: Kitchen Tools, sales_channel: online}}
+  - id: q30
+    split: dev
+    question: How many online orders came from the Sydney region in March 2026?
+    spec: {metric: orders, start: 2026-03-01, end: 2026-03-31, filters: {sales_channel: online, region: Sydney}}
+
+  - id: q31
+    split: holdout
+    question: What was total revenue across all channels in February 2026?
+    spec: {metric: revenue, start: 2026-02-01, end: 2026-02-28}
+  - id: q32
+    split: holdout
+    question: Which region had the highest average online order value over the financial year?
+    spec: {metric: average_order_value, start: 2025-04-01, end: 2026-03-31, filters: {sales_channel: online}, argmax: region}
+  - id: q33
+    split: holdout
+    question: What return on ad spend did affiliate marketing deliver in December 2025?
+    spec: {metric: roas, start: 2025-12-01, end: 2025-12-31, filters: {marketing_channel: affiliate}}
+  - id: q34
+    split: holdout
+    question: What was the gross margin on Food Storage products in January 2026?
+    spec: {metric: gross_margin, start: 2026-01-01, end: 2026-01-31, filters: {product_category: Food Storage}}
+  - id: q35
+    split: holdout
+    question: What was the on-time delivery rate in Australia for deliveries promised between October 2025 and February 2026?
+    spec: {metric: on_time_delivery_rate, start: 2025-10-01, end: 2026-02-28, filters: {country: AU}}
+  - id: q36
+    split: holdout
+    question: How many units did wholesale customers buy in October 2025?
+    spec: {metric: units_sold, start: 2025-10-01, end: 2025-10-31, filters: {sales_channel: wholesale}}
+  - id: q37
+    split: holdout
+    question: Which paid marketing channel did we spend the most on over the financial year?
+    spec: {metric: ad_spend, start: 2025-04-01, end: 2026-03-31, argmax: marketing_channel}
+  - id: q38
+    split: holdout
+    question: How much revenue did the Melbourne store make in February 2026, in NZD?
+    spec: {metric: revenue, start: 2026-02-01, end: 2026-02-28, filters: {sales_channel: store, region: Melbourne}}
+  - id: q39
+    split: holdout
+    question: What was the average order value across all channels in December 2025?
+    spec: {metric: average_order_value, start: 2025-12-01, end: 2025-12-31}
+  - id: q40
+    split: holdout
+    question: How much online revenue came from Australian customers between October and December 2025?
+    spec: {metric: revenue, start: 2025-10-01, end: 2025-12-31, filters: {sales_channel: online, country: AU}}
