@@ -50,6 +50,7 @@ class AgentRun:
     all_cached: bool = True
     cached_calls: int = 0
     tool_calls: list[dict] = field(default_factory=list)
+    last_result: dict | None = None  # the most recent successful tool result (rows the answer came from)
     error: str = ""
 
     @property
@@ -121,7 +122,9 @@ async def answer(question: str, tools: MetricsTools, llm: LLM, catalogue: list[d
             try:
                 if name not in AGENT_TOOLS:
                     raise ToolError(f"tool {name} is not available")
-                content = _compact(await tools.call(name, args))
+                result = await tools.call(name, args)
+                run.last_result = result
+                content = _compact(result)
             except ToolError as e:
                 content = f"ERROR: {e}"
             run.tool_seconds += time.perf_counter() - started

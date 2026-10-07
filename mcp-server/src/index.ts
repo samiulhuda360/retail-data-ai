@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Stdio entry point: `node dist/src/index.js` (an MCP client such as Claude Desktop, an IDE or the
+// Stdio entry point: `node dist/src/index.js` (an MCP client such as a desktop assistant, an IDE or the
 // Python analyst in this repo starts it as a subprocess).
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 

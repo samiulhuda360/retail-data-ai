@@ -49,6 +49,7 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM"]
 "retail_ai/legacy/legacy_reports.py" = ["E501", "E741", "SIM", "UP", "B"]
 # The HTML template in the report keeps its CSS rules on one line each.
 "retail_ai/dq/report.py" = ["E501"]
+"retail_ai/eval/html.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

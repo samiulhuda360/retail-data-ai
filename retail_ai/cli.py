@@ -99,10 +99,18 @@ def cmd_ask(a: argparse.Namespace) -> int:
             except NoModel as e:
                 print(f"{e}. Set AI_API_KEY to ask questions; the metrics tools work without it (see mcp-server).")
                 return 2
+        print(f"Q: {a.question}")
         for call in run.tool_calls:
-            print(f"  tool {call['tool']}({json.dumps(call['arguments'])})")
-        print(f"answer: {run.answer}")
-        print(f"why:    {run.explanation}")
+            print(f"  -> {call['tool']}({json.dumps(call['arguments'])})")
+        rows = (run.last_result or {}).get("rows") or []
+        if rows:
+            cols = list(rows[0])
+            fmt = [lambda v: f"{v:,.4f}" if isinstance(v, float) else str(v)][0]
+            widths = [max(len(c), *(len(fmt(r[c])) for r in rows[:12])) for c in cols]
+            print("     " + "  ".join(c.ljust(w) for c, w in zip(cols, widths, strict=True)))
+            for r in rows[:12]:
+                print("     " + "  ".join(fmt(r[c]).ljust(w) for c, w in zip(cols, widths, strict=True)))
+        print(f"A: {run.explanation or run.answer}")
         print(
             f"({run.llm_calls} model calls, {run.prompt_tokens + run.completion_tokens} tokens, {run.latency_s:.2f}s)"
         )
@@ -121,6 +129,11 @@ def cmd_eval(a: argparse.Namespace) -> int:
     from .eval.run import SYSTEMS
     from .eval.run import main as eval_main
 
+    if a.report:
+        from .eval.run import combined_report
+
+        print(combined_report())
+        return 0
     systems = a.systems.split(",") if a.systems else list(SYSTEMS)
     ids = a.ids.split(",") if a.ids else None
     return eval_main(systems, a.split, offline=a.offline, oracle=a.oracle, ids=ids)
@@ -158,6 +171,7 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--ids", help="comma-separated question ids (debug runs are not saved)")
     e.add_argument("--offline", action="store_true", help="use cached model responses only")
     e.add_argument("--oracle", action="store_true", help="no model: check the semantic layer against references")
+    e.add_argument("--report", action="store_true", help="rebuild eval/results/summary.md from the recorded runs")
     e.set_defaults(func=cmd_eval)
     a = ap.parse_args(argv)
     return int(a.func(a))

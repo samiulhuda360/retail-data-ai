@@ -24,11 +24,17 @@ models:
     staging:
       +materialized: view
       +schema: staging
+      +docs:
+        node_color: "#4f9a8f"
     intermediate:
       +materialized: view
       +schema: intermediate
+      +docs:
+        node_color: "#3b7d74"
     marts:
       +materialized: table
+      +docs:
+        node_color: "#2f6f68"
       core:
         +schema: marts
       reporting:

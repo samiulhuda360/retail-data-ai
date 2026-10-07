@@ -24,6 +24,7 @@ from .. import paths
 from ..agent import analyst, text_to_sql
 from ..llm import LLM, NoModel, cost_usd
 from ..mcp_client import metrics_session
+from .html import render
 from .reference import Question, load_questions, reference_answers
 from .scoring import is_correct, oracle_answer, oracle_request
 
@@ -108,8 +109,10 @@ async def run_models(
 
 def summarise(rows: list[dict]) -> list[dict]:
     out = []
+    present = {r["split"] for r in rows}
+    splits = ["dev", "holdout"] + (["all"] if len(present) > 1 else [])
     for system in SYSTEMS:
-        for split in ("dev", "holdout", "all"):
+        for split in splits:
             sel = [
                 r
                 for r in rows
@@ -170,6 +173,28 @@ def to_markdown(summary: list[dict], rows: list[dict], model: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+def combined_report() -> str:
+    """Rebuilds eval/results/summary.md from the recorded dev and holdout runs (no model calls)."""
+    rows, models, live, cached = [], set(), 0, 0
+    for split in ("dev", "holdout"):
+        path = RESULTS / f"results_{split}.json"
+        if path.exists():
+            body = json.loads(path.read_text(encoding="utf-8"))
+            rows += [r for r in body["rows"] if r["split"] == split]
+            models.add(body["model"])
+            live, cached = live + body["live_calls"], cached + body["cached_calls"]
+    md = to_markdown(summarise(rows), rows, ", ".join(sorted(models)))
+    md += (
+        f"\nRecorded runs: {live} live model calls and {cached} answered from the cache (responses recorded "
+        "by earlier live calls with the same prompt). `retail eval --offline` re-scores every question from "
+        "the cache without a key.\n"
+    )
+    (RESULTS / "summary.md").write_text(md, encoding="utf-8")
+    page = render(summarise(rows), rows, ", ".join(sorted(models)), live, cached)
+    (RESULTS / "summary.html").write_text(page, encoding="utf-8")
+    return md
+
+
 def main(systems: list[str], split: str, offline: bool, oracle: bool, ids: list[str] | None = None) -> int:
     questions = [q for q in load_questions() if (split == "all" or q.split == split) and (not ids or q.id in ids)]
     refs = reference_answers(questions)
@@ -200,7 +225,7 @@ def main(systems: list[str], split: str, offline: bool, oracle: bool, ids: list[
             "rows": rows,
         }
         (RESULTS / f"results_{split}.json").write_text(json.dumps(body, indent=1, default=str) + "\n")
-        (RESULTS / f"summary_{split}.md").write_text(md)
+        combined_report()
     print()
     print(md)
     print(f"model calls this run: {llm.live_calls} live, {llm.cached_calls} from cache")
