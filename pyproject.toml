@@ -44,7 +44,9 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 # The legacy script is the deliberately untidy "before" picture; it is checked for errors only.
-"retail_ai/legacy/legacy_reports.py" = ["E501", "SIM", "UP", "B"]
+"retail_ai/legacy/legacy_reports.py" = ["E501", "E741", "SIM", "UP", "B"]
+# The HTML template in the report keeps its CSS rules on one line each.
+"retail_ai/dq/report.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

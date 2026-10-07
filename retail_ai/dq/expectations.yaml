@@ -1,0 +1,40 @@
+# Which checks are designed to catch which kind of failure. The data-quality report uses this to show,
+# for each planted failure in the ground truth, the checks that fired on it.
+#
+# `evidence` (optional) is a query over the stored test failures (schema dq_audit) that must return rows
+# pointing at the planted location; {placeholders} are filled from the ground-truth record.
+
+late_file:
+  checks:
+    - freshness:raw.logistics_shipments
+    - recon_online_orders_vs_shipments
+duplicate_rows:
+  checks:
+    - pos_transaction_line_is_unique
+    - recon_pos_raw_vs_finance
+  evidence: >-
+    select count(*) from dq_audit.recon_pos_raw_vs_finance
+    where store_id = '{store_id}' and business_date = date '{date}'
+schema_drift:
+  checks:
+    - ecom_orders_columns_match_contract
+  evidence: >-
+    select count(*) from dq_audit.ecom_orders_columns_match_contract where column_name = '{column}'
+currency_mixup:
+  checks:
+    - assert_pos_currency_matches_store
+    - recon_pos_raw_vs_finance
+  evidence: >-
+    select count(*) from dq_audit.assert_pos_currency_matches_store
+    where store_id = '{store_id}' and _source_file like '%{month}%'
+missing_foreign_key:
+  checks:
+    - erp_sales_order_material_exists
+  evidence: >-
+    select count(*) from dq_audit.erp_sales_order_material_exists where from_field = '{material_id}'
+negative_quantity:
+  checks:
+    - pos_sale_quantity_is_positive
+    - recon_pos_raw_vs_finance
+  evidence: >-
+    select count(*) from dq_audit.pos_sale_quantity_is_positive where transaction_id = '{transaction_id}'

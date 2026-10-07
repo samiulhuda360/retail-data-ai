@@ -83,6 +83,7 @@ sources:
             data_tests:
               - not_null
               - relationships:
+                  name: erp_sales_order_material_exists
                   arguments:
                     to: source('raw', 'erp_materials')
                     field: MATERIAL
