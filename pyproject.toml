@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "retail-data-ai"
+version = "1.0.0"
+description = "A retail data platform (dbt + DuckDB) with data-quality checks, a MetricFlow semantic layer, an MCP server and an AI analyst."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Samiul Huda" }]
+dependencies = [
+  "duckdb==1.5.6",
+  "dbt-core>=1.10,<1.13",
+  "dbt-duckdb>=1.9,<1.12",
+  "dbt-metricflow[dbt-duckdb]>=0.11",
+  "pandas>=2.2",
+  "numpy>=1.26",
+  "pyyaml>=6",
+  "openai>=1.50",
+  "mcp>=1.10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff==0.16.10"]
+
+[project.scripts]
+retail = "retail_ai.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["retail_ai*"]
+
+[tool.setuptools.package-data]
+retail_ai = ["eval/*.yaml", "dq/*.yaml"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["dbt/target", "dbt/dbt_packages", "mcp-server"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# The legacy script is the deliberately untidy "before" picture; it is checked for errors only.
+"retail_ai/legacy/legacy_reports.py" = ["E501", "SIM", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "pipeline: needs the generated data and a built warehouse (run `retail build` first)",
+  "slow: runs dbt or MetricFlow end to end",
+]

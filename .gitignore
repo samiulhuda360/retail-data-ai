@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
+mcp-server/dist/
+
+# Generated data and builds (regenerate with `retail generate` and `retail build`)
+data/
+build/
+.cache/llm/
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+logs/
+
+# Secrets and local settings
+.env
+.env.*
+*.duckdb.wal
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
