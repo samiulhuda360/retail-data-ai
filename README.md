@@ -1,11 +1,65 @@
 # retail-data-ai
 
-**A retail data platform with an AI analyst on top.** Source feeds from an ERP, store tills, a web shop, a
-logistics provider and three ad platforms are loaded into DuckDB, modelled with dbt, checked for data quality,
-reconciled against finance, and exposed through a MetricFlow semantic layer. A TypeScript MCP server lets AI tools
-query the governed metrics, and an analyst agent and a weekly campaign-report agent answer through it.
+![Demo: the data checks, the health report, a question answered by the AI analyst, the weekly ad report and the test results](docs/demo.gif)
 
-![Demo: dbt build, data-quality report, lineage, legacy comparison, analyst agent, campaign report, evaluation](docs/demo.gif)
+*A short recording of the project running from start to finish: the sales files are loaded and checked, a report
+lists the problems found in them, the AI analyst answers questions, and a weekly advertising report is written.*
+
+## What it does
+
+A shop that sells in stores, online and to other businesses ends up with its sales spread across many separate
+files. This project gathers them into one place every week, checks them for mistakes before anyone relies on them,
+and lets staff ask questions such as "which advert brought in the most sales last month?" in plain English. The
+answers always come from the same agreed definitions, so two people asking the same question get the same number.
+
+## A real-life example
+
+Hana is the marketing manager at Acme Kitchen Co., which sells kitchenware through seven shops in New Zealand and
+Australia, two online stores and sixteen trade customers.
+
+**Before:** her figures come from a dozen exports: the accounts system, the shop tills, the online store, the
+delivery company and three advertising sites. Each week someone copies them into a spreadsheet by hand. Mistakes
+slip through unnoticed: one shop's day of sales sent twice, Australian dollars labelled as New Zealand dollars, a
+delivery file that never arrived. When she has a quick question she waits for an analyst, and two reports can
+disagree on what "revenue" means.
+
+**With this project:**
+1. The files are loaded and checked automatically. A health report lists every problem it found, which file it is
+   in, and what was done about it.
+2. She types a question in plain English, for example "Which marketing channel gave the best return on ad spend
+   in December?", and gets the answer with the figures it came from.
+3. Every week a short written report on the advertising arrives. It is only released if every number in it
+   matches the data.
+
+**After:** in testing, the checks caught all 6 of the problems hidden in a year of data, with no false alarms. On 40
+business questions the analyst got all 40 right, in about 3 seconds each. An AI that wrote its own database
+queries without the agreed definitions got only 24 of the 40 right.
+
+![Hana's week in four steps: the data health report, a question answered, the weekly ad report, and the test results](docs/screenshots/example.gif)
+
+*Hana's week in four steps, from real screens of the project: the health report on this week's files, plain-English
+questions and answers, the weekly advertising report, and the test on 40 business questions.*
+
+## How you would use it
+
+1. Your data team sets the project up once and points it at the folder where the weekly exports land.
+2. Each week, open the data health report in your web browser. It shows which files arrived, what was wrong with
+   them and whether the figures can be trusted.
+3. Type a business question in plain English into the analyst. You get a short answer plus the table of figures
+   behind it.
+4. Read the weekly advertising report: spend, sales and return per channel, with a suggested action.
+5. If a number looks odd, ask the analyst to explain how that figure is defined and where it comes from.
+
+The commands for all of this are in [Setup](#setup) and [Usage](#usage) further down.
+
+## Overview
+
+**A retail data platform with an AI analyst on top.** Data from an ERP (the accounts and stock system), store tills, a web shop, a
+logistics provider and three ad platforms is loaded into DuckDB (a fast, single-file database), shaped into clean
+tables with dbt (a tool that builds tables from tested SQL queries), checked for data quality, reconciled against
+finance, and exposed through a MetricFlow semantic layer (one shared list of how each business figure is
+calculated). A TypeScript MCP server (MCP is a standard way for AI tools to call other software) lets AI tools
+query those agreed figures, and an analyst agent and a weekly campaign-report agent answer through it.
 
 The business is fictional: **Acme Kitchen Co.**, a maker of kitchen and home products with seven stores in New
 Zealand and Australia, two web shops and sixteen wholesale customers. One financial year of data (April 2025 to
@@ -17,10 +71,11 @@ quality and a semantic layer, and teams connecting AI assistants to governed bus
 
 ## Key features
 
-- **Multi-source pipelines.** ERP exports (SAP-style fields, `yyyymmdd` dates), POS files per store, web-shop
-  orders, weekly 3PL shipment files and three marketing exports with different formats, ingested into DuckDB.
+- **Multi-source pipelines** (automated steps that load and clean each feed). ERP exports (`yyyymmdd` dates),
+  POS (till) files per store, web-shop orders, weekly 3PL (outsourced delivery company) shipment files and three
+  marketing exports with different formats, ingested into DuckDB.
 - **dbt project (dbt-duckdb):** staging, intermediate and marts layers, 32 documented models, CTEs, window
-  functions (`row_number` de-duplication, `lag`, running totals, `rank`/`dense_rank`) and multi-source joins.
+  functions (calculations across neighbouring rows: `row_number` de-duplication, `lag`, running totals, `rank`/`dense_rank`) and multi-source joins.
 - **Data quality that catches every planted failure:** `unique`, `not_null`, `relationships`, `accepted_values`,
   source freshness, a schema-contract test, and reconciliations of POS takings against the finance ledger and of
   web orders against shipments. A generated report shows which check caught which failure, and a webhook alert
@@ -34,16 +89,16 @@ quality and a semantic layer, and teams connecting AI assistants to governed bus
 - **Agents:** an analyst that answers questions through the MCP tools, and a weekly campaign-report writer whose
   report is rejected unless every number in it traces back to a query result.
 - **Evaluation on accuracy, cost and latency:** 40 business questions with independent reference answers,
-  comparing plain text-to-SQL with the semantic-layer agent, including a 10-question holdout.
+  comparing plain text-to-SQL (the AI writes its own database query) with the semantic-layer agent, including a 10-question holdout.
 
 ## Screenshots
 
 | | |
 |---|---|
-| ![dbt build](docs/screenshots/dbt-build.png) **dbt source freshness and build.** The stale 3PL feed is an error; the planted failures warn; mart tests and the finance reconciliation pass. | ![Data-quality report](docs/screenshots/dq-report.png) **Data-quality report.** Each planted failure, the checks that caught it and the failing-row counts. |
-| ![Lineage](docs/screenshots/dbt-lineage.png) **Lineage (`dbt docs`).** Raw feeds through staging and intermediate models to the marts and the metrics built on them. | ![Legacy vs dbt](docs/screenshots/legacy-vs-dbt.png) **Legacy vs dbt.** The legacy script reads the bad files as delivered; each differing row maps to a planted failure. |
-| ![Analyst agent](docs/screenshots/agent-ask.png) **Analyst agent.** One `query_metric` call per question; the model never writes SQL. | ![Campaign report](docs/screenshots/campaign-report.png) **Weekly campaign report**, written by the model and passed by the grounding check. |
-| ![Evaluation](docs/screenshots/evaluation.png) **Evaluation.** 40 questions, both systems, every answer against its reference. | ![MCP server tests](docs/screenshots/mcp-tests.png) **MCP server tests** through the SDK's in-memory client, including the SQL guard. |
+| ![dbt build](docs/screenshots/dbt-build.png) **Loading and checking the data.** The late delivery file is flagged as an error, the other planted problems as warnings, and the final tables and the check against the accounts pass. | ![Data-quality report](docs/screenshots/dq-report.png) **Data health report.** Each problem hidden in the data, the check that caught it and how many rows it affected. |
+| ![Lineage](docs/screenshots/dbt-lineage.png) **Where each figure comes from.** The raw files flow through the cleaning steps to the final tables and figures. | ![Legacy vs dbt](docs/screenshots/legacy-vs-dbt.png) **Old reports vs new.** The old script takes the bad files at face value; every row where the two disagree traces back to one of the hidden problems. |
+| ![Analyst agent](docs/screenshots/agent-ask.png) **Analyst agent.** Questions in plain English, the figures it looked up, and the answer. The AI picks a figure from the agreed list rather than writing its own query. | ![Campaign report](docs/screenshots/campaign-report.png) **Weekly advertising report**, written by the AI and released only after every number in it was matched to the data. |
+| ![Evaluation](docs/screenshots/evaluation.png) **Test results.** 40 business questions, both approaches, every answer compared with the correct figure. | ![MCP server tests](docs/screenshots/mcp-tests.png) **Automated tests** for the part that lets AI tools read the figures, including the guard that allows read-only queries only. |
 
 ## Architecture
 
