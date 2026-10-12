@@ -14,7 +14,7 @@ moment, so results are identical on any day.
 |---|---|---|---|
 | ERP material master, customers, stores, FX rates | `erp/*.csv` | daily snapshot | upper-case SAP-style names, `yyyymmdd` dates |
 | ERP finance ledger (store takings) | `erp/gl_store_takings_YYYY-MM.csv` | monthly | NZD and local amounts per store-day |
-| ERP wholesale sales orders | `erp/sales_orders_YYYY-MM.csv` | monthly | `SALES_DOC`, `ITEM`, `MATERIAL`, `NET_VALUE` |
+| ERP wholesale sales orders, SAP SD format | `erp/vbak_YYYY-MM.csv` (headers), `erp/vbap_YYYY-MM.csv` (items) | monthly | SAP VBAK/VBAP field names: `VBELN`, `AUART`, `VKORG`, `KUNNR`, `AUDAT`, `VDATU`, `NETWR` on the header; `VBELN`, `POSNR` (`000010`), `MATNR`, `KWMENG` (3 decimals), `VRKME`, `NETPR` per `KPEIN`, `NETWR`, `WAERK` on the item |
 | Store tills (POS) | `pos/<store>/pos_<store>_YYYY-MM.csv` | monthly per store | one row per transaction line; refunds are `RETURN` lines |
 | Web shop | `ecommerce/orders_*.csv`, `order_lines_*.csv` | monthly | last-touch `marketing_channel` on each order |
 | 3PL shipments | `logistics/shipments_YYYY-Www.csv` | weekly, 9 days after the week | promised and delivered timestamps |

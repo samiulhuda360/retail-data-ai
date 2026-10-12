@@ -1,16 +1,25 @@
--- Wholesale sales order lines from the ERP, renamed from SAP-style fields and typed.
+-- Wholesale sales order lines from the SAP SD extract: VBAP items joined to their VBAK header, renamed and typed.
+with items as (
+    select * from {{ source('raw', 'erp_sales_order_items') }}
+),
+
+headers as (
+    select * from {{ source('raw', 'erp_sales_order_headers') }}
+)
+
 select
-    SALES_DOC || '-' || ITEM                        as sales_order_line_id,
-    SALES_DOC                                       as sales_order_id,
-    cast(ITEM as integer)                           as item,
-    {{ parse_date('DOC_DATE', 'yyyymmdd') }}        as order_date,
-    SOLD_TO                                         as customer_id,
-    MATERIAL                                        as material_id,
-    cast(ORDER_QTY as integer)                      as quantity,
-    UOM                                             as unit_of_measure,
-    cast(NET_PRICE as decimal(12, 2))               as unit_price,
-    cast(NET_VALUE as decimal(14, 2))               as net_value,
-    CURRENCY                                        as currency,
-    {{ parse_date('REQ_DLV_DATE', 'yyyymmdd') }}    as requested_delivery_date,
-    _source_file
-from {{ source('raw', 'erp_sales_orders') }}
+    items.VBELN || '-' || cast(cast(items.POSNR as integer) as varchar)  as sales_order_line_id,
+    items.VBELN                                                          as sales_order_id,
+    cast(items.POSNR as integer)                                         as item,
+    {{ parse_date('headers.AUDAT', 'yyyymmdd') }}                        as order_date,
+    headers.KUNNR                                                        as customer_id,
+    items.MATNR                                                          as material_id,
+    cast(cast(items.KWMENG as decimal(15, 3)) as integer)                as quantity,
+    items.VRKME                                                          as unit_of_measure,
+    cast(cast(items.NETPR as decimal(12, 2)) / cast(items.KPEIN as integer) as decimal(12, 2)) as unit_price,
+    cast(items.NETWR as decimal(14, 2))                                  as net_value,
+    items.WAERK                                                          as currency,
+    {{ parse_date('headers.VDATU', 'yyyymmdd') }}                        as requested_delivery_date,
+    items._source_file
+from items
+left join headers on items.VBELN = headers.VBELN

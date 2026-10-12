@@ -75,10 +75,19 @@ sources:
       - name: erp_gl_store_takings
         description: Finance ledger postings of each store's daily takings, in local currency and NZD. Monthly files.
 
-      - name: erp_sales_orders
-        description: Wholesale sales order lines exported monthly from the ERP.
+      - name: erp_sales_order_headers
+        description: >-
+          SAP SD sales order headers (table VBAK fields), exported monthly. VBELN sales document, AUART order
+          type, VKORG sales organisation, VTWEG distribution channel, SPART division, AUDAT document date, VDATU
+          requested delivery date, KUNNR sold-to customer, WAERK currency, NETWR net value of the document.
+
+      - name: erp_sales_order_items
+        description: >-
+          SAP SD sales order items (table VBAP fields), exported monthly. VBELN and POSNR (item number, e.g.
+          000010) identify the line; MATNR material, KWMENG order quantity, VRKME sales unit, NETPR net price
+          per KPEIN units, NETWR net value of the item, WAERK currency.
         columns:
-          - name: MATERIAL
+          - name: MATNR
             description: Material ordered. Must exist in the material master.
             data_tests:
               - not_null
@@ -90,7 +99,7 @@ sources:
                   config:
                     severity: warn
                     tags: ["dq_detect"]
-          - name: CURRENCY
+          - name: WAERK
             data_tests:
               - accepted_values:
                   arguments:

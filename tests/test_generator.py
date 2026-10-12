@@ -78,3 +78,13 @@ def test_landing_zone_layout_and_ground_truth(dataset, tmp_path):
     assert set(s07["currency"]) == {"NZD"}
     gt = json.loads((tmp_path / "gt.json").read_text())
     assert gt["planted"] and len(gt["failures"]) == 6 and gt["files"] == summary["files"]
+    # Wholesale orders arrive as an SAP SD extract: VBAK headers and VBAP items whose net values add up.
+    vbak = pd.read_csv(raw / "erp" / "vbak_2025-11.csv", dtype=str)
+    vbap = pd.read_csv(raw / "erp" / "vbap_2025-11.csv", dtype=str)
+    assert {"VBELN", "AUART", "VKORG", "AUDAT", "VDATU", "KUNNR", "WAERK", "NETWR"} <= set(vbak.columns)
+    assert {"VBELN", "POSNR", "MATNR", "KWMENG", "VRKME", "NETPR", "KPEIN", "NETWR"} <= set(vbap.columns)
+    assert vbak["VBELN"].is_unique and set(vbap["VBELN"]) == set(vbak["VBELN"])
+    assert vbap["POSNR"].str.fullmatch(r"\d{6}").all()
+    item_sum = vbap.assign(n=vbap["NETWR"].astype(float)).groupby("VBELN")["n"].sum().round(2)
+    head = vbak.set_index("VBELN")["NETWR"].astype(float)
+    assert (item_sum.sort_index() - head.sort_index()).abs().max() < 0.005

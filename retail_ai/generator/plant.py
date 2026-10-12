@@ -111,8 +111,8 @@ def plant(clean: Dataset) -> Planted:
         {
             "id": "F5",
             "kind": "missing_foreign_key",
-            "source": "erp.sales_orders",
-            "where": "erp/sales_orders_2026-03.csv -> erp/materials.csv",
+            "source": "erp.sales_order_items",
+            "where": "erp/vbap_2026-03.csv -> erp/materials.csv",
             "detail": f"Wholesale lines order {late_id}, which the material master export does not contain yet.",
             "rows": orphan,
             "material_id": late_id,

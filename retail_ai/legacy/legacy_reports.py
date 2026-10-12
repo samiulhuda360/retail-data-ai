@@ -72,21 +72,18 @@ def main():
     web["is_sale"] = True
 
     # ---- wholesale
-    so = pd.concat(
-        [
-            pd.read_csv(f, dtype={"DOC_DATE": str, "SALES_DOC": str})
-            for f in sorted(glob.glob(RAW + "/erp/sales_orders_*.csv"))
-        ]
-    )
-    so["day"] = so["DOC_DATE"].str[0:4] + "-" + so["DOC_DATE"].str[4:6] + "-" + so["DOC_DATE"].str[6:8]
+    hd = pd.concat([pd.read_csv(f, dtype=str) for f in sorted(glob.glob(RAW + "/erp/vbak_*.csv"))])
+    so = pd.concat([pd.read_csv(f, dtype={"VBELN": str}) for f in sorted(glob.glob(RAW + "/erp/vbap_*.csv"))])
+    so = so.merge(hd[["VBELN", "AUDAT", "KUNNR"]], on="VBELN")
+    so["day"] = so["AUDAT"].str[0:4] + "-" + so["AUDAT"].str[4:6] + "-" + so["AUDAT"].str[6:8]
     so["month"] = so["day"].str[0:7]
-    so["rev"] = so.apply(lambda r: nzd(r["NET_VALUE"], r["CURRENCY"], r["day"]), axis=1)
-    so = so.merge(mats[["MATERIAL", "STD_COST_NZD", "cat"]], on="MATERIAL")
-    so["cogs"] = so["STD_COST_NZD"] * so["ORDER_QTY"]
+    so["rev"] = so.apply(lambda r: nzd(r["NETWR"], r["WAERK"], r["day"]), axis=1)
+    so = so.merge(mats[["MATERIAL", "STD_COST_NZD", "cat"]], left_on="MATNR", right_on="MATERIAL")
+    so["cogs"] = so["STD_COST_NZD"] * so["KWMENG"]
     so["channel"] = "wholesale"
-    so["region"] = so["SOLD_TO"].map(cust_region)
-    so["order_id"] = so["SALES_DOC"]
-    so["quantity"] = so["ORDER_QTY"]
+    so["region"] = so["KUNNR"].map(cust_region)
+    so["order_id"] = so["VBELN"]
+    so["quantity"] = so["KWMENG"]
     so["is_sale"] = True
 
     cols = ["month", "channel", "region", "order_id", "quantity", "rev", "cogs", "cat", "is_sale"]

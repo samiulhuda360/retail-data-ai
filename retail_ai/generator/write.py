@@ -108,28 +108,54 @@ def write(dataset: Dataset, raw: Path, planted: Planted | None = None, late_dir:
         )
         files += 1
 
+    # Wholesale orders as an SAP SD sales-order extract: VBAK (header) and VBAP (item) field names,
+    # one header file and one item file per month.
+    country_of = {cid: c.REGION_BY_CODE[region].country for cid, _name, region in c.CUSTOMERS}
     w = d.wholesale.assign(month=pd.to_datetime(d.wholesale["doc_date"]).dt.strftime("%Y-%m"))
     for month, part in w.groupby("month"):
+        heads = part.groupby("sales_doc", as_index=False, sort=False).agg(
+            doc_date=("doc_date", "first"),
+            req=("req_delivery_date", "first"),
+            sold_to=("sold_to", "first"),
+            currency=("currency", "first"),
+            net=("net_value", "sum"),
+        )
         _save(
             pd.DataFrame(
                 {
-                    "SALES_DOC": part["sales_doc"],
-                    "ITEM": part["item"],
-                    "DOC_DATE": _ymd(part["doc_date"]),
-                    "SOLD_TO": part["sold_to"],
-                    "MATERIAL": part["material_id"],
-                    "ORDER_QTY": part["order_qty"],
-                    "UOM": part["uom"],
-                    "NET_PRICE": part["net_price"],
-                    "NET_VALUE": part["net_value"],
-                    "CURRENCY": part["currency"],
-                    "REQ_DLV_DATE": _ymd(part["req_delivery_date"]),
+                    "VBELN": heads["sales_doc"],
+                    "AUART": "OR",
+                    "VKORG": heads["sold_to"].map(country_of) + "10",
+                    "VTWEG": "20",
+                    "SPART": "00",
+                    "AUDAT": _ymd(heads["doc_date"]),
+                    "VDATU": _ymd(heads["req"]),
+                    "KUNNR": heads["sold_to"],
+                    "WAERK": heads["currency"],
+                    "NETWR": heads["net"].round(2),
                 }
             ),
-            raw / "erp" / f"sales_orders_{month}.csv",
+            raw / "erp" / f"vbak_{month}.csv",
             _month_extract(month),
         )
-        files += 1
+        _save(
+            pd.DataFrame(
+                {
+                    "VBELN": part["sales_doc"],
+                    "POSNR": part["item"].map(lambda i: f"{int(i):06d}"),
+                    "MATNR": part["material_id"],
+                    "KWMENG": part["order_qty"].map(lambda q: f"{q:.3f}"),
+                    "VRKME": part["uom"],
+                    "NETPR": part["net_price"],
+                    "KPEIN": 1,
+                    "NETWR": part["net_value"],
+                    "WAERK": part["currency"],
+                }
+            ),
+            raw / "erp" / f"vbap_{month}.csv",
+            _month_extract(month),
+        )
+        files += 2
 
     # POS: one file per store per month
     pos = d.pos.assign(month=d.pos["txn_ts"].dt.strftime("%Y-%m"))
