@@ -42,7 +42,8 @@ questions and answers, the weekly advertising report, and the test on 40 busines
 
 ## How you would use it
 
-1. Your data team sets the project up once and points it at the folder where the weekly exports land.
+1. Your data team sets the project up once and points it at the folder where the weekly exports land. A
+   scheduled job then runs the load and the checks by itself, for example every morning at 6.
 2. Each week, open the data health report in your web browser. It shows which files arrived, what was wrong with
    them and whether the figures can be trusted.
 3. Type a business question in plain English into the analyst. You get a short answer plus the table of figures
@@ -50,20 +51,23 @@ questions and answers, the weekly advertising report, and the test on 40 busines
 4. Read the weekly advertising report: spend, sales and return per channel, with a suggested action.
 5. If a number looks odd, ask the analyst to explain how that figure is defined and where it comes from.
 
-The commands for all of this are in [Setup](#setup) and [Usage](#usage) further down.
+The commands for all of this are in [Setup](#setup) and [Usage](#usage) further down, and
+[Running it on a schedule](#running-it-on-a-schedule) says how the weekly run is automated. Five worked examples of
+the questions an analyst would answer in SQL, with their real results, are in [SQL examples](docs/sql-examples.md).
 
 ## Overview
 
-**A retail data platform with an AI analyst on top.** Data from an ERP (the accounts and stock system), store tills, a web shop, a
-logistics provider and three ad platforms is loaded into DuckDB (a fast, single-file database), shaped into clean
-tables with dbt (a tool that builds tables from tested SQL queries), checked for data quality, reconciled against
-finance, and exposed through a MetricFlow semantic layer (one shared list of how each business figure is
-calculated). A TypeScript MCP server (MCP is a standard way for AI tools to call other software) lets AI tools
-query those agreed figures, and an analyst agent and a weekly campaign-report agent answer through it.
+**A retail data platform with an AI analyst on top.** Data from an ERP (the accounts and stock system; wholesale
+orders arrive as an SAP sales-order export), store tills, a web shop, a logistics provider and three ad platforms
+is loaded into DuckDB (a fast, single-file database), shaped into clean tables with dbt (a tool that builds tables
+from tested SQL queries), checked for data quality, reconciled against finance, and exposed through a MetricFlow
+semantic layer (one shared list of how each business figure is calculated). A TypeScript MCP server (MCP is a
+standard way for AI tools to call other software) lets AI tools query those agreed figures, and an analyst agent
+and a weekly campaign-report agent answer through it.
 
 The business is fictional: **Acme Kitchen Co.**, a maker of kitchen and home products with seven stores in New
 Zealand and Australia, two web shops and sixteen wholesale customers. One financial year of data (April 2025 to
-March 2026, about 220 files and 17 MB) is generated from a fixed seed, with six realistic data failures planted in
+March 2026, about 235 files and 17 MB) is generated from a fixed seed, with six realistic data failures planted in
 it and recorded as ground truth.
 
 **Who it is for:** data and analytics engineers who want an end-to-end reference for retail pipelines with data
@@ -71,11 +75,16 @@ quality and a semantic layer, and teams connecting AI assistants to governed bus
 
 ## Key features
 
-- **Multi-source pipelines** (automated steps that load and clean each feed). ERP exports (`yyyymmdd` dates),
+- **Multi-source pipelines** (automated steps that load and clean each feed). ERP exports in SAP format: wholesale
+  orders as SAP SD sales-order headers and items (`VBAK`/`VBAP` fields such as `VBELN`, `POSNR`, `MATNR`, `KWMENG`,
+  `NETWR`), joined and renamed in staging, plus master data, FX rates and the finance ledger (`yyyymmdd` dates);
   POS (till) files per store, web-shop orders, weekly 3PL (outsourced delivery company) shipment files and three
   marketing exports with different formats, ingested into DuckDB.
 - **dbt project (dbt-duckdb):** staging, intermediate and marts layers, 32 documented models, CTEs, window
   functions (calculations across neighbouring rows: `row_number` de-duplication, `lag`, running totals, `rank`/`dense_rank`) and multi-source joins.
+- **[SQL examples](docs/sql-examples.md):** five queries over the marts with their real output: a running total,
+  a rank within each category, a customer cohort retention table, month-over-month change with `LAG`, and
+  de-duplication with `ROW_NUMBER`.
 - **Data quality that catches every planted failure:** `unique`, `not_null`, `relationships`, `accepted_values`,
   source freshness, a schema-contract test, and reconciliations of POS takings against the finance ledger and of
   web orders against shipments. A generated report shows which check caught which failure, and a webhook alert
@@ -107,7 +116,7 @@ quality and a semantic layer, and teams connecting AI assistants to governed bus
 flowchart TB
     subgraph Sources["Landing zone (data/raw)"]
         direction LR
-        ERP["ERP exports<br/>master data, FX,<br/>ledger, sales orders"]
+        ERP["ERP exports (SAP)<br/>master data, FX, ledger,<br/>VBAK/VBAP sales orders"]
         POS["Store tills (POS)<br/>7 stores, monthly files"]
         WEB["Web shop<br/>orders and lines"]
         TPL["3PL shipments<br/>weekly files"]
@@ -145,7 +154,8 @@ flowchart TB
    promotions, refunds, FX rates, marketing spend sized per channel, and carrier performance. It then plants six
    failures and writes them to `data/ground_truth.json`.
 2. **Ingest.** `retail ingest` loads each feed into `raw.<feed>` as text, combining a feed's files by column name
-   so a drifted file still loads, and logs every file in `raw._ingest_log`.
+   so a drifted file still loads, and logs every file in `raw._ingest_log`. The SAP order headers and items are
+   two feeds, `erp_sales_order_headers` and `erp_sales_order_items`, which staging joins on `VBELN`.
 3. **Freshness.** `dbt source freshness` compares each feed's latest `_extracted_at` with the as-of time
    (2026-04-01 06:00 UTC, replayed so results are the same on any day). The missing 3PL week is an error.
 4. **Build and test.** `dbt build` runs seeds, 32 models and 89 tests. Detection tests on the raw feeds warn on bad
@@ -278,9 +288,15 @@ semantic layer (40/40).
 | Model used in the evaluation | `gemini-flash-lite-latest` through Gemini's OpenAI-compatible endpoint |
 | Quality | ruff, tsc, pytest, GitHub Actions |
 
-The same dbt project targets Databricks via dbt-databricks: `dbt/profiles.yml` includes a `databricks` profile,
-and the few dialect differences (date parsing, date series) sit behind `adapter.dispatch` macros in
-`dbt/macros/dialect/`. Everything in this repository runs and is tested on DuckDB.
+**Warehouse: DuckDB.** Everything in this repository runs and is tested on DuckDB; it has not been run on
+Databricks or Snowflake. The dbt project is written to move: `dbt/profiles.yml` includes a `databricks` profile for
+dbt-databricks, and the few dialect differences (date parsing, date series) sit behind `adapter.dispatch` macros in
+`dbt/macros/dialect/`.
+
+**Source format:** the ERP side follows SAP S/4HANA and ECC naming. Wholesale orders are SAP SD sales-order
+headers (`VBAK`: `VBELN`, `AUART`, `VKORG`, `VTWEG`, `SPART`, `AUDAT`, `VDATU`, `KUNNR`, `WAERK`, `NETWR`) and items
+(`VBAP`: `VBELN`, `POSNR`, `MATNR`, `KWMENG`, `VRKME`, `NETPR`, `KPEIN`, `NETWR`, `WAERK`), one file of each per
+month. The field list for every feed is in [docs/design.md](docs/design.md).
 
 ## Setup
 
@@ -330,12 +346,27 @@ bash scripts/demo.sh                     # everything below except the live eval
 Outputs: `build/dq/dq_report.html` (and `.md`, `.json`), `build/legacy/*.csv`, `build/reports/campaign_<week>.md`,
 `eval/results/`.
 
+### Running it on a schedule
+
+The pipeline is one command, `retail pipeline`. It exits with an error when the build itself fails (a test on the
+final tables, such as the store-revenue reconciliation with the finance ledger), so a scheduler can flag the run.
+Problems in the delivered files (a late or duplicated file, a currency mix-up) are reported as warnings in the
+health report, and its summary is posted to `DQ_WEBHOOK_URL`. The repository does not ship a production schedule;
+these are the ways it would be run:
+
+- **cron or Windows Task Scheduler** on the machine that receives the exports, for example
+  `0 6 * * 1-5 cd /srv/retail-data-ai && retail pipeline`, with `DQ_WEBHOOK_URL` set so the health report's summary is posted to the team channel.
+- **GitHub Actions** with an `on: schedule` trigger running the same steps as [ci.yml](.github/workflows/ci.yml),
+  reading the exports from cloud storage and keeping the DuckDB file and the reports as artifacts.
+- **On a cloud warehouse**, the dbt part (`dbt source freshness`, `dbt build`) moves to dbt Cloud jobs or Databricks
+  Workflows on the `databricks` target, with ingestion handled by the platform's loader.
+
 ## Project structure
 
 ```
 retail-data-ai/
 ├── retail_ai/                  Python package and `retail` CLI
-│   ├── generator/              seeded simulation, planted failures, landing-zone writer
+│   ├── generator/              seeded simulation, planted failures, landing-zone writer (SAP-format ERP files)
 │   ├── ingest.py               landing zone -> raw.* tables in DuckDB
 │   ├── pipeline.py             runs dbt (freshness, build, docs)
 │   ├── dq/                     DQ report, expectations (failure -> checks), webhook alert, mock receiver
@@ -349,7 +380,7 @@ retail-data-ai/
 ├── mcp-server/                 TypeScript MCP server: compiler, SQL guard, lineage, tools, tests
 ├── eval/                       recorded evaluation results and the model-response cache
 ├── tests/                      pytest: generator, ingestion, pipeline, DQ, agents, MetricFlow parity
-├── docs/                       design reference, screenshots, demo GIF
+├── docs/                       design reference, SQL examples (sql-examples.md, sql/), screenshots, demo GIF
 ├── scripts/                    setup.sh, demo.sh
 └── .github/workflows/ci.yml
 ```
