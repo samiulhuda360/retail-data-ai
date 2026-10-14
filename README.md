@@ -14,7 +14,7 @@ answers always come from the same agreed definitions, so two people asking the s
 
 ## A real-life example
 
-Hana is the marketing manager at Acme Kitchen Co., which sells kitchenware through seven shops in New Zealand and
+Claire is the marketing manager at Acme Kitchen Co., which sells kitchenware through seven shops in New Zealand and
 Australia, two online stores and sixteen trade customers.
 
 **Before:** her figures come from a dozen exports: the accounts system, the shop tills, the online store, the
@@ -35,9 +35,9 @@ disagree on what "revenue" means.
 business questions the analyst got all 40 right, in about 3 seconds each. An AI that wrote its own database
 queries without the agreed definitions got only 24 of the 40 right.
 
-![Hana's week in four steps: the data health report, a question answered, the weekly ad report, and the test results](docs/screenshots/example.gif)
+![Claire's week in four steps: the data health report, a question answered, the weekly ad report, and the test results](docs/screenshots/example.gif)
 
-*Hana's week in four steps, from real screens of the project: the health report on this week's files, plain-English
+*Claire's week in four steps, from real screens of the project: the health report on this week's files, plain-English
 questions and answers, the weekly advertising report, and the test on 40 business questions.*
 
 ## How you would use it
